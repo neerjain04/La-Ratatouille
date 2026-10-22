@@ -1,0 +1,13 @@
+{% extends "la_ratatouille_app/base.html" %}
+{% block body %}
+<h1>Search</h1>
+<form action="{% url 'search' %}" method="GET">
+{{ form }}
+<input type="submit" value="search" />
+</form>
+<ul>
+{% for recipe in recipes %}
+<li>{{ recipe }}</li>
+{% endfor %}
+</ul>
+{% endblock %}
