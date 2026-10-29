@@ -116,12 +116,6 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.1/howto/static-files/
 
 STATIC_URL = 'static/'
-# Store uploaded recipe photos in the project's media folder.
-MEDIA_URL = 'media/'
-MEDIA_ROOT = BASE_DIR / 'media'
-# Return users to the home page after signing in or out.
-LOGIN_REDIRECT_URL = '/'
-LOGOUT_REDIRECT_URL = '/'
 
 
 # Email

@@ -1,16 +1,13 @@
 {% extends "la_ratatouille_app/base.html" %}
 {% block body %}
-{# Search recipes by ingredients, then link each result to its detail page. #}
 <h1>Search</h1>
 <form action="{% url 'search' %}" method="GET">
-{{ form.as_p }}
+{{ form }}
 <input type="submit" value="search" />
 </form>
 <ul>
 {% for recipe in recipes %}
-<li><a href="{% url 'recipe_detail' recipe.pk %}">{{ recipe.name }}</a></li>
-{% empty %}
-<li>Enter ingredients to search for recipes.</li>
+<li>{{ recipe }}</li>
 {% endfor %}
 </ul>
 {% endblock %}
