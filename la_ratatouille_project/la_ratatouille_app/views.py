@@ -62,7 +62,7 @@ def recipe_detail(request, recipe_id):
     reviews = Review.objects.filter(recipe=recipe)
     form = ReviewForm()
 
-    return render(request, "recipe_detail.html", {
+    return render(request, "la_ratatouille_app/recipe_detail.html", {
         "recipe": recipe,
         "reviews": reviews,
         "form": form
@@ -107,3 +107,40 @@ def search(request):
 
     context = {"recipes": recipes, "form": form}
     return render(request, "la_ratatouille_app/search.html", context)
+
+
+# Edit Comment
+@login_required
+def edit_comment(request, review_id):
+
+    # Find the review belonging to the logged-in user
+    review = get_object_or_404(
+        Review,
+        id=review_id,
+        user=request.user
+    )
+
+    # Only allow editing existing comments
+    if not review.comment:
+        return HttpResponse("No comment to edit.", status=400)
+
+    if request.method == "POST":
+
+        # Get the updated comment
+        new_comment = request.POST.get("comment", "").strip()
+
+        if not new_comment:
+            return HttpResponse("Comment cannot be empty.", status=400)
+
+        # Update only the comment
+        review.comment = new_comment
+        review.save()
+
+        # Return to the recipe page
+        return redirect("recipe_detail", recipe_id=review.recipe.id)
+
+    
+    return render(request, "la_ratatouille_app/edit_comment.html", {
+    "review": review
+})
+

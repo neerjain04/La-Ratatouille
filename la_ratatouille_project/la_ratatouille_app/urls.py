@@ -16,4 +16,8 @@ urlpatterns = [
 
     # Remove a comment
     path("review/<int:review_id>/remove-comment/", views.remove_comment, name="remove_comment"),
+
+    # Edit a comment
+    path("review/<int:review_id>/edit-comment/", views.edit_comment, name="edit_comment"),
+
 ]

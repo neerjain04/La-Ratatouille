@@ -1,5 +1,4 @@
 
-
 <!DOCTYPE html>
 <html>
 <head>
@@ -20,8 +19,14 @@
         {% if review.comment %}
             <p>{{ review.comment }}</p>
 
-            <!-- Remove Comment -->
             {% if review.user == user %}
+
+                <!-- Edit Comment -->
+                <a href="{% url 'edit_comment' review.id %}">
+                    Edit Comment
+                </a>
+
+                <!-- Remove Comment -->
                 <form method="POST"
                       action="{% url 'remove_comment' review.id %}">
                     {% csrf_token %}
@@ -30,6 +35,7 @@
                         Remove Comment
                     </button>
                 </form>
+
             {% endif %}
 
         {% endif %}
