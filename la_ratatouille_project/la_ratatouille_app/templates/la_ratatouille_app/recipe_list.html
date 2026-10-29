@@ -1,0 +1,6 @@
+{% extends "la_ratatouille_app/base.html" %}
+{% block body %}
+<!-- Reuse the same recipe list for owned recipes and favorites. -->
+<h1>{{ title }}</h1>
+{% include "la_ratatouille_app/recipe_cards.html" %}
+{% endblock %}

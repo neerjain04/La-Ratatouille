@@ -1,0 +1,11 @@
+{% extends "la_ratatouille_app/base.html" %}
+{% block body %}
+<!-- Deletion only happens after the user confirms with this form. -->
+<h1>Delete {{ recipe.name }}?</h1>
+<p>This will permanently delete the recipe.</p>
+<form method="post">
+    {% csrf_token %}
+    <button type="submit">Confirm delete</button>
+    <a href="{% url 'recipe_detail' recipe.pk %}">Cancel</a>
+</form>
+{% endblock %}

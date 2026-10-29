@@ -15,9 +15,17 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
+from django.conf import settings
+from django.conf.urls.static import static
 from django.urls import include, path
 
 urlpatterns = [
     path('', include("la_ratatouille_app.urls")),
+    # Use Django's built-in login and logout pages.
+    path("accounts/", include("django.contrib.auth.urls")),
     path('admin/', admin.site.urls),
 ]
+
+# Let Django serve uploaded recipe photos during local development.
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

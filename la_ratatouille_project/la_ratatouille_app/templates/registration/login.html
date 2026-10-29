@@ -1,0 +1,11 @@
+{% extends "la_ratatouille_app/base.html" %}
+{% block body %}
+<!-- This form uses Django's built-in login handler. -->
+<h1>Log in</h1>
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
+    <button type="submit">Log in</button>
+</form>
+{% endblock %}
