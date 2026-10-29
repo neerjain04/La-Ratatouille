@@ -1,0 +1,65 @@
+
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ recipe.name }} - La Ratatouille</title>
+</head>
+<body>
+
+    <h1>{{ recipe.name }}</h1>
+
+    <h2>Instructions</h2>
+    <p>{{ recipe.instructions }}</p>
+
+    <h2>Reviews</h2>
+
+    {% for review in reviews %}
+        <p>Rating: {{ review.rating }}/5</p>
+
+        {% if review.comment %}
+            <p>{{ review.comment }}</p>
+
+            <!-- Remove Comment -->
+            {% if review.user == user %}
+                <form method="POST"
+                      action="{% url 'remove_comment' review.id %}">
+                    {% csrf_token %}
+
+                    <button type="submit">
+                        Remove Comment
+                    </button>
+                </form>
+            {% endif %}
+
+        {% endif %}
+
+        <hr>
+    {% empty %}
+        <p>No reviews yet.</p>
+    {% endfor %}
+
+    <h2>Add a Review</h2>
+
+    {% if user.is_authenticated %}
+
+        <form method="POST"
+              action="{% url 'add_comment' recipe.id %}">
+
+            {% csrf_token %}
+
+            {{ form.as_p }}
+
+            <button type="submit">
+                Submit Review
+            </button>
+        </form>
+
+    {% else %}
+
+        <p>Please log in to leave a review.</p>
+
+    {% endif %}
+
+</body>
+</html>

@@ -1,4 +1,5 @@
 
+
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
@@ -6,7 +7,7 @@ from django.db.models import Q
 from functools import reduce
 
 from .models import Recipe, Review
-from .forms import SearchForm
+from .forms import SearchForm, ReviewForm
 
 
 # Home page
@@ -18,37 +19,75 @@ def index(request):
 @login_required
 def add_comment(request, recipe_id):
 
-    if request.method == "POST":
+    if request.method != "POST":
+        return HttpResponse("Invalid request.", status=405)
 
-        recipe = get_object_or_404(Recipe, id=recipe_id)
+    recipe = get_object_or_404(Recipe, id=recipe_id)
+    form = ReviewForm(request.POST)
 
-        rating = request.POST.get("rating")
-        comment = request.POST.get("comment", "").strip()
-
-        if rating not in ["1", "2", "3", "4", "5"]:
-            return HttpResponse("Please select a rating from 1 to 5.", status=400)
+    if form.is_valid():
 
         existing_review = Review.objects.filter(
             user=request.user,
             recipe=recipe
-        ).exists()
+        ).first()
 
         if existing_review:
-            return HttpResponse(
-                "You have already reviewed this recipe.",
-                status=400
-            )
 
-        Review.objects.create(
-            user=request.user,
-            recipe=recipe,
-            rating=int(rating),
-            comment=comment
-        )
+            if existing_review.comment:
+                return HttpResponse(
+                    "You have already commented on this recipe.",
+                    status=400
+                )
+
+            # Add a comment while keeping the existing rating
+            existing_review.comment = form.cleaned_data["comment"]
+            existing_review.save()
+
+        else:
+            review = form.save(commit=False)
+            review.user = request.user
+            review.recipe = recipe
+            review.save()
 
         return redirect("recipe_detail", recipe_id=recipe_id)
 
-    return HttpResponse("Invalid request.", status=405)
+    return HttpResponse("Invalid rating or comment.", status=400)
+
+
+# Display recipe and reviews
+def recipe_detail(request, recipe_id):
+
+    recipe = get_object_or_404(Recipe, id=recipe_id)
+    reviews = Review.objects.filter(recipe=recipe)
+    form = ReviewForm()
+
+    return render(request, "recipe_detail.html", {
+        "recipe": recipe,
+        "reviews": reviews,
+        "form": form
+    })
+
+
+# Remove Comment
+@login_required
+def remove_comment(request, review_id):
+
+    if request.method != "POST":
+        return HttpResponse("Invalid request.", status=405)
+
+    # Find the review belonging to the logged-in user
+    review = get_object_or_404(
+        Review,
+        id=review_id,
+        user=request.user
+    )
+
+    # Remove only the comment, keeping the rating
+    review.comment = ""
+    review.save()
+
+    return redirect("recipe_detail", recipe_id=review.recipe.id)
 
 
 # Search Recipes
