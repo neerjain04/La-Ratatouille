@@ -20,4 +20,12 @@ urlpatterns = [
     # Edit a comment
     path("review/<int:review_id>/edit-comment/", views.edit_comment, name="edit_comment"),
 
+    
+    # Favorite Recipe
+    path("recipe/<int:recipe_id>/favorite/", views.favorite_recipe, name="favorite_recipe"),
+    
+    # Unfavorite Recipe
+    path("recipe/<int:recipe_id>/unfavorite/", views.unfavorite_recipe, name="unfavorite_recipe"),
+
+
 ]

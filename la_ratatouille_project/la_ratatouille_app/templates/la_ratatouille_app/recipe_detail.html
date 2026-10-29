@@ -8,6 +8,38 @@
 
     <h1>{{ recipe.name }}</h1>
 
+    <!-- Favorite and Unfavorite Recipe -->
+    {% if user.is_authenticated %}
+
+        {% if is_favorite %}
+            <p>♥ This recipe is in your favorites!</p>
+
+            <!-- Unfavorite Recipe -->
+            <form method="POST"
+                  action="{% url 'unfavorite_recipe' recipe.id %}">
+                {% csrf_token %}
+
+                <button type="submit">
+                    Unfavorite Recipe
+                </button>
+            </form>
+
+        {% else %}
+
+            <!-- Favorite Recipe -->
+            <form method="POST"
+                  action="{% url 'favorite_recipe' recipe.id %}">
+                {% csrf_token %}
+
+                <button type="submit">
+                    Favorite Recipe
+                </button>
+            </form>
+
+        {% endif %}
+
+    {% endif %}
+
     <h2>Instructions</h2>
     <p>{{ recipe.instructions }}</p>
 
@@ -69,3 +101,4 @@
 
 </body>
 </html>
+

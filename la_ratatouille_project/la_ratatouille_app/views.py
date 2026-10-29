@@ -1,12 +1,11 @@
 
-
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 from functools import reduce
 
-from .models import Recipe, Review
+from .models import Recipe, Review, Favorite
 from .forms import SearchForm, ReviewForm
 
 
@@ -62,10 +61,20 @@ def recipe_detail(request, recipe_id):
     reviews = Review.objects.filter(recipe=recipe)
     form = ReviewForm()
 
+    # Check if the user has favorited this recipe
+    is_favorite = False
+
+    if request.user.is_authenticated:
+        is_favorite = Favorite.objects.filter(
+            user=request.user,
+            recipe=recipe
+        ).exists()
+
     return render(request, "la_ratatouille_app/recipe_detail.html", {
         "recipe": recipe,
         "reviews": reviews,
-        "form": form
+        "form": form,
+        "is_favorite": is_favorite
     })
 
 
@@ -139,8 +148,49 @@ def edit_comment(request, review_id):
         # Return to the recipe page
         return redirect("recipe_detail", recipe_id=review.recipe.id)
 
-    
     return render(request, "la_ratatouille_app/edit_comment.html", {
-    "review": review
-})
+        "review": review
+    })
+
+
+# Favorite Recipe
+@login_required
+def favorite_recipe(request, recipe_id):
+
+    # Only allow form submissions
+    if request.method != "POST":
+        return HttpResponse("Invalid request.", status=405)
+
+    # Find the recipe
+    recipe = get_object_or_404(Recipe, id=recipe_id)
+
+    # Add the recipe to user's favorites
+    Favorite.objects.get_or_create(
+        user=request.user,
+        recipe=recipe
+    )
+
+    # Return to the recipe page
+    return redirect("recipe_detail", recipe_id=recipe_id)
+
+# Unfavorite Recipe
+@login_required
+def unfavorite_recipe(request, recipe_id):
+
+    # Only allow form submissions
+    if request.method != "POST":
+        return HttpResponse("Invalid request.", status=405)
+
+    # Find the recipe
+    recipe = get_object_or_404(Recipe, id=recipe_id)
+
+    # Remove the recipe from user's favorites
+    Favorite.objects.filter(
+        user=request.user,
+        recipe=recipe
+    ).delete()
+
+    # Return to the recipe page
+    return redirect("recipe_detail", recipe_id=recipe_id)
+
 
