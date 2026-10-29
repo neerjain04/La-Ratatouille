@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 from django.db import models
 from django.conf import settings
 
@@ -60,6 +62,42 @@ class Recipe(models.Model):
 
     def __str__(self):
         return self.name
+
+    # ------------------------------------------------------------ pantry use cases
+    # Methods only (no new fields), so no migration is needed.
+
+    def scale_batch(self, multiplier):
+        """
+        UC 51 Adjust Batch Size (class diagram: Recipe.scaleBatch).
+        Returns [(ingredient, unit, scaled quantity)] for multiplier x the recipe.
+        Nothing is saved; the stored recipe stays the same.
+        """
+        multiplier = Decimal(str(multiplier))
+        if multiplier <= 0:
+            raise ValueError("The batch size must be more than 0.")
+        return [
+            (ri.ingredient, ri.unit, (Decimal(ri.quantity) * multiplier).quantize(Decimal("0.01")))
+            for ri in self.recipe_ingredients.select_related("ingredient", "unit")
+        ]
+
+    def multiplier_for(self, servings):
+        """How much to scale the recipe to make `servings` servings."""
+        return Decimal(servings) / Decimal(self.num_servings)
+
+    def get_missing_ingredients(self, pantry, multiplier=1):
+        """
+        UC 53 Determine Missing Ingredients (class diagram: Recipe.getMissingIngredients).
+        Returns [(ingredient, unit, needed, have)] for everything the pantry lacks.
+        """
+        have = {item.ingredient_id: item for item in pantry.items()}
+        missing = []
+        for ingredient, unit, needed in self.scale_batch(multiplier):
+            item = have.get(ingredient.id)
+            if item is None or item.unit_id != (unit.id if unit else None):
+                missing.append((ingredient, unit, needed, 0))   # not there, or a different unit
+            elif item.quantity < needed:
+                missing.append((ingredient, unit, needed, item.quantity))
+        return missing
 
 
 class RecipeTag(models.Model):
