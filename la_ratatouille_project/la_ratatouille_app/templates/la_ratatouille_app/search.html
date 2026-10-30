@@ -5,9 +5,32 @@
 {{ form }}
 <input type="submit" value="search" />
 </form>
-<ul>
-{% for recipe in recipes %}
-<li>{{ recipe }}</li>
-{% endfor %}
-</ul>
+<table>
+    <thead>
+        <tr>
+            <td>Recipe Name</td>
+            <td>Rating</td>
+            <td>Preparation Time</td>
+            <td>Ingredient Count</td>
+            <td>Missing Ingredient Count</td>
+        </tr>
+    </thead>
+    <tbody>
+        {% for recipe in recipes %}
+        <tr>
+            <!-- TODO: Link to recipe model view page -->
+            <!-- TODO: Display recipe photo -->
+            <td><strong>{{ recipe }}</strong></td> 
+            <td>{{ recipe.rating }}</td> 
+            <td>{{ recipe.prep_time }}</td>
+            <td>{{ recipe.ingredient_count }}</td>
+            <td>    
+                {% if request.user.is_authenticated %}
+                {{ recipe.count_missing_ingredients }}
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}    
+    </tbody>
+</table>
 {% endblock %}
