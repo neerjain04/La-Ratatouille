@@ -1,31 +1,30 @@
 
+{% extends "la_ratatouille_app/base.html" %}
 
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Edit Comment - La Ratatouille</title>
-</head>
-<body>
+{% block body %}
 
-    <h1>Edit Comment</h1>
+<h1>Edit Comment</h1>
 
-    <h2>{{ review.recipe.name }}</h2>
+<h2>{{ review.recipe.name }}</h2>
 
-    <form method="POST">
-        {% csrf_token %}
+<form method="POST">
+    {% csrf_token %}
 
-        <label for="comment">Comment:</label>
+    <label for="comment">Comment:</label>
 
-        <textarea id="comment" name="comment" rows="4" cols="40" required>{{ review.comment }}</textarea>
+    <textarea id="comment" name="comment"
+              rows="4" cols="40" required>{{ review.comment }}</textarea>
 
-        <br>
+    <br>
 
-        <button type="submit">Save Changes</button>
+    <button type="submit">
+        Save Changes
+    </button>
 
-        <a href="{% url 'recipe_detail' review.recipe.id %}">
-            Cancel
-        </a>
-    </form>
+    <a href="{% url 'recipe_detail' review.recipe.id %}">
+        Cancel
+    </a>
+</form>
 
-</body>
-</html>
+{% endblock %}
+
