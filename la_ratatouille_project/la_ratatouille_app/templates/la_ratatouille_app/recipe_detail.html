@@ -1,9 +1,96 @@
+
 {% extends "la_ratatouille_app/base.html" %}
+
 {% block body %}
+
+<h1>{{ recipe.name }}</h1>
+
+<!-- Favorite and Unfavorite Recipe -->
+{% if user.is_authenticated %}
+
+    {% if is_favorite %}
+        <p>♥ This recipe is in your favorites!</p>
+
+        <form method="POST"
+              action="{% url 'unfavorite_recipe' recipe.id %}">
+            {% csrf_token %}
+
+            <button type="submit">
+                Unfavorite Recipe
+            </button>
+        </form>
+
+    {% else %}
+        <form method="POST"
+              action="{% url 'favorite_recipe' recipe.id %}">
+            {% csrf_token %}
+
+            <button type="submit">
+                Favorite Recipe
+            </button>
+        </form>
+    {% endif %}
+
+{% endif %}
+
+<h2>Instructions</h2>
+<p>{{ recipe.instructions }}</p>
+
+<h2>Reviews</h2>
+
+{% for review in reviews %}
+    <p>Rating: {{ review.rating }}/5</p>
+
+    {% if review.comment %}
+        <p>{{ review.comment }}</p>
+
+        {% if review.user == user %}
+
+            <!-- Edit Comment -->
+            <a href="{% url 'edit_comment' review.id %}">
+                Edit Comment
+            </a>
+
+            <!-- Remove Comment -->
+            <form method="POST"
+                  action="{% url 'remove_comment' review.id %}">
+                {% csrf_token %}
+
+                <button type="submit">
+                    Remove Comment
+                </button>
+            </form>
+
+        {% endif %}
+    {% endif %}
+
+    <hr>
+{% empty %}
+    <p>No reviews yet.</p>
+{% endfor %}
+
+<h2>Add a Review</h2>
+
+{% if user.is_authenticated %}
+
+    <form method="POST"
+          action="{% url 'add_comment' recipe.id %}">
+        {% csrf_token %}
+
+        {{ form.as_p }}
+
+        <button type="submit">
+            Submit Review
+        </button>
+    </form>
+
+{% else %}
+    <p>Please log in to leave a review.</p>
+{% endif %}
 <h1>{{ recipe.name }}</h1>
 <p>Makes {{ recipe.num_servings }} serving{{ recipe.num_servings|pluralize }}. Prep time {{ recipe.prep_time }} min.</p>
 
-{# UC 51 Adjust Batch Size #}
+{# djust Batch Size #}
 <form method="get">{{ form.as_p }}<button>Adjust batch size</button></form>
 
 <h2>Ingredients for {{ servings }} serving{{ servings|pluralize }}</h2>
@@ -13,7 +100,7 @@
   {% endfor %}
 </ul>
 
-{# UC 53 Determine Missing Ingredients #}
+{# Determine Missing Ingredients #}
 <h2>What you're missing</h2>
 {% if not missing %}
   <p>You have everything you need.</p>
@@ -28,3 +115,4 @@
 <h2>Instructions</h2>
 <p>{{ recipe.instructions|linebreaksbr }}</p>
 {% endblock %}
+
