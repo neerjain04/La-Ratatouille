@@ -20,9 +20,25 @@ class Profile(models.Model):
 
 class Tag(models.Model):
     name = models.CharField(max_length=50, unique=True)
+    users = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name="dietary_restrictions", through="UserTag")
 
     def __str__(self):
         return self.name
+
+class UserTag(models.Model):
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="user_tags",
+    )
+    tag = models.ForeignKey(Tag, on_delete=models.CASCADE, related_name="user_tags")
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["user", "tag"], name="unique_dietary_restriction_per_user"
+            ),
+        ]
 
 
 class Unit(models.Model):

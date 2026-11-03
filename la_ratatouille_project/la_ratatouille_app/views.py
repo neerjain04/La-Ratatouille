@@ -42,9 +42,12 @@ def search(request):
         if max_ingredient_count is not None:
             recipes = recipes.filter(ingredient_count__lte=max_ingredient_count)
 
-        # annotate with missing ingredient count for logged in users
+        # logged in users
         if request.user.is_authenticated:
-            # TODO filter by dietary restrictions
+            # filter by dietary restrictions
+            recipes = reduce(lambda recipes, tag: recipes.filter(tags=tag),
+                             request.user.dietary_restrictions.all(), recipes)
+            # annotate with missing ingredient count
             recipes = recipes.annotate(
                 count_missing_ingredients=F("ingredient_count") - Count("ingredients", distinct=True,
                                             filter=Q(ingredients__users=request.user)))
