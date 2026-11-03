@@ -1,0 +1,9 @@
+{% extends "la_ratatouille_app/base.html" %}
+{% block body %}
+<h1>Delete your pantry?</h1>
+<p>This removes every ingredient in it. It can't be undone.</p>
+<form method="post">{% csrf_token %}
+  <button>Yes, delete my pantry</button>
+  <a href="{% url 'pantry' %}">Cancel</a>
+</form>
+{% endblock %}
