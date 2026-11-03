@@ -3,7 +3,6 @@ from django.http import HttpResponse
 from .models import Recipe
 from .forms import SearchForm
 from django.db.models import F, Q, Count, Avg
-from functools import reduce
 
 def index(request):
     return HttpResponse("Welcome to La Ratatouille. This page is under construction.")
@@ -24,11 +23,11 @@ def search(request):
         if max_prep_time is not None:
             recipes = recipes.filter(prep_time__lte=max_prep_time) 
         if len(ingredients) > 0:
-            recipes = reduce(lambda recipes, ingredient: recipes.filter(ingredients=ingredient),
-                             ingredients, recipes)
+            for ingredient in ingredients:
+                recipes = recipes.filter(ingredients=ingredient)
         if len(tags) > 0:
-            recipes = reduce(lambda recipes, tag: recipes.filter(tags=tag),
-                            tags, recipes)
+            for tag in tags:
+                recipes = recipes.filter(tags=tag)
 
         recipes = Recipe.objects.filter(id__in=recipes.values_list("id"))
 
@@ -45,8 +44,9 @@ def search(request):
         # logged in users
         if request.user.is_authenticated:
             # filter by dietary restrictions
-            recipes = reduce(lambda recipes, tag: recipes.filter(tags=tag),
-                             request.user.dietary_restrictions.all(), recipes)
+            for restriction in request.user.dietary_restrictions.all():
+                recipes = recipes.filter(tags=restriction)
+
             # annotate with missing ingredient count
             recipes = recipes.annotate(
                 count_missing_ingredients=F("ingredient_count") - Count("ingredients", distinct=True,
