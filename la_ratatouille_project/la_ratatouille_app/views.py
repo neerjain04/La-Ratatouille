@@ -1,19 +1,15 @@
-
-from django.shortcuts import render, redirect, get_object_or_404
-from django.http import HttpResponse
-from django.contrib.auth.decorators import login_required
-from django.contrib import messages
-from django.shortcuts import get_object_or_404, redirect, render
-from django.views.decorators.http import require_POST
-from django.http import HttpResponse
-from .pantry import Pantry
-from .models import Ingredient, Recipe
-from .forms import BatchSizeForm, PantryItemForm, SearchForm
-from django.db.models import Q
 from functools import reduce
 
-from .models import Recipe, Review, Favorite
-from .forms import SearchForm, ReviewForm
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.db.models import Q
+from django.http import HttpResponse
+from django.shortcuts import get_object_or_404, redirect, render
+from django.views.decorators.http import require_POST
+
+from .forms import BatchSizeForm, PantryItemForm, ReviewForm, SearchForm
+from .models import Favorite, Ingredient, Recipe, Review
+from .pantry import Pantry
 
 
 # Home page
@@ -61,27 +57,39 @@ def add_comment(request, recipe_id):
     return HttpResponse("Invalid rating or comment.", status=400)
 
 
-# Display recipe and reviews
+# Display recipe: reviews, favorite, batch size (UC 51) and missing ingredients (UC 53)
 def recipe_detail(request, recipe_id):
 
     recipe = get_object_or_404(Recipe, id=recipe_id)
     reviews = Review.objects.filter(recipe=recipe)
     form = ReviewForm()
 
-    # Check if the user has favorited this recipe
+    # UC 51 Adjust Batch Size: ?servings=N rescales the ingredient amounts
+    batch_form = BatchSizeForm(request.GET or None, initial={"servings": recipe.num_servings})
+    servings = batch_form.cleaned_data["servings"] if batch_form.is_valid() else recipe.num_servings
+    multiplier = recipe.multiplier_for(servings)
+    lines = recipe.scale_batch(multiplier)
+
+    # Check if the user has favorited this recipe, and (UC 53) what their pantry is missing
     is_favorite = False
+    missing = None
 
     if request.user.is_authenticated:
         is_favorite = Favorite.objects.filter(
             user=request.user,
             recipe=recipe
         ).exists()
+        missing = recipe.get_missing_ingredients(Pantry(request.user), multiplier)
 
     return render(request, "la_ratatouille_app/recipe_detail.html", {
         "recipe": recipe,
         "reviews": reviews,
         "form": form,
-        "is_favorite": is_favorite
+        "is_favorite": is_favorite,
+        "batch_form": batch_form,
+        "servings": servings,
+        "lines": lines,
+        "missing": missing,
     })
 
 
@@ -236,19 +244,3 @@ def pantry_delete(request):
         messages.success(request, f"Deleted your pantry ({count} ingredients).")
         return redirect("pantry")
     return render(request, "la_ratatouille_app/pantry_confirm_delete.html")
-
-
-# ---------------------------------------------------------------- Recipe page (UC 51, 53)
-@login_required
-def recipe_detail(request, recipe_id):
-    """UC 51: ?servings=N rescales the ingredients. UC 53: lists what the pantry is missing."""
-    recipe = get_object_or_404(Recipe, pk=recipe_id)
-    form = BatchSizeForm(request.GET or None, initial={"servings": recipe.num_servings})
-    servings = form.cleaned_data["servings"] if form.is_valid() else recipe.num_servings
-    multiplier = recipe.multiplier_for(servings)
-    context = {
-        "recipe": recipe, "form": form, "servings": servings,
-        "lines": recipe.scale_batch(multiplier),
-        "missing": recipe.get_missing_ingredients(Pantry(request.user), multiplier),
-    }
-    return render(request, "la_ratatouille_app/recipe_detail.html", context)

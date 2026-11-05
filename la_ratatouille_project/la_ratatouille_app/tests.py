@@ -123,3 +123,30 @@ class MissingIngredientsTests(PantryTestBase):     # UC 53
         self.assertTrue(pantry.check_recipe_ingredients(self.recipe))
         names = [ing.name for ing, _, _, _ in self.recipe.get_missing_ingredients(pantry, 2)]
         self.assertEqual(names, ["Flour", "Egg"])
+
+
+class RecipeDetailPageTests(PantryTestBase):       # one page for reviews, favorites, UC 51 and UC 53
+    def test_one_url_for_recipe_detail(self):
+        self.assertEqual(reverse("recipe_detail", args=[self.recipe.id]), f"/recipe/{self.recipe.id}/")
+
+    def test_reviews_and_batch_size_on_same_page(self):
+        from .models import Review
+        Review.objects.create(user=self.user, recipe=self.recipe, rating=5, comment="Fluffy!")
+        self.client.force_login(self.user)
+        resp = self.client.get(reverse("recipe_detail", args=[self.recipe.id]), {"servings": 8})
+        self.assertContains(resp, "Fluffy!")                   # Jenna's reviews
+        self.assertContains(resp, "Favorite Recipe")           # Jenna's favorite button
+        self.assertContains(resp, "Ingredients for 8 servings")  # UC 51
+        self.assertContains(resp, "What you're missing")       # UC 53
+        self.assertContains(resp, "Submit Review")
+
+    def test_logged_out_visitor_can_view(self):
+        resp = self.client.get(reverse("recipe_detail", args=[self.recipe.id]))
+        self.assertEqual(resp.status_code, 200)
+        self.assertContains(resp, "Please log in to leave a review.")
+        self.assertNotContains(resp, "What you're missing")
+
+    def test_add_comment_redirects_back_to_recipe(self):
+        self.client.force_login(self.user)
+        resp = self.client.post(reverse("add_comment", args=[self.recipe.id]), {"rating": 4, "comment": "Good"})
+        self.assertRedirects(resp, f"/recipe/{self.recipe.id}/")

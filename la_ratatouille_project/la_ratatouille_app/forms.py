@@ -35,7 +35,6 @@ class ReviewForm(forms.ModelForm):
                 attrs={"placeholder": "Write your comment here..."}
             )
         }
-        required=False,)
 
 class PantryItemForm(forms.Form):
     """UC 52: add an ingredient or change its amount. Quantity 0 removes it."""

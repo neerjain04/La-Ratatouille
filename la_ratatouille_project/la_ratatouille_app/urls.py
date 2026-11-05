@@ -31,5 +31,4 @@ urlpatterns = [
     path("pantry/", views.pantry, name="pantry"),                                 
     path("pantry/delete/", views.pantry_delete, name="pantry_delete"),            
     path("pantry/remove/<int:ingredient_id>/", views.pantry_remove_item, name="pantry_remove_item"),
-    path("recipes/<int:recipe_id>/", views.recipe_detail, name="recipe_detail"),   
 ]
