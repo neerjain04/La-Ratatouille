@@ -1,5 +1,5 @@
 """
-Pantry (class diagram: Pantry) for use cases 52-55.
+Pantry (class diagram: Pantry).
 
 Our schema has no Pantry table: a user's pantry is their UserIngredient rows.
 This class wraps the managers that already exist on User:
@@ -22,7 +22,7 @@ class Pantry:
         """Just the Ingredient objects, using the existing user.pantry manager."""
         return self.user.pantry.all()
 
-    # ------------------------------------------------------------ UC 54 Create Pantry
+    # ------------------------------------------------------------ Create Pantry
     @classmethod
     def create(cls, user, starting_items=()):
         """Start a pantry. It is empty unless starting_items [(ingredient, unit, qty)] are given."""
@@ -31,13 +31,13 @@ class Pantry:
             pantry.add_ingredient(ingredient, quantity, unit)
         return pantry
 
-    # ------------------------------------------------------------ UC 55 Delete Pantry
+    # ------------------------------------------------------------ Delete Pantry
     def delete(self):
         """Remove every ingredient from the pantry. Returns how many were removed."""
         deleted, _ = self.user.user_ingredients.all().delete()
         return deleted
 
-    # ------------------------------------------------------------ UC 52 Edit Ingredient in Pantry
+    # ------------------------------------------------------------ Edit Ingredient in Pantry
     def add_ingredient(self, ingredient, quantity, unit=None):
         """Add an ingredient or change its amount. 0 removes it. (class diagram: addIngredient)"""
         quantity = int(quantity)

@@ -68,7 +68,7 @@ class Recipe(models.Model):
 
     def scale_batch(self, multiplier):
         """
-        UC 51 Adjust Batch Size (class diagram: Recipe.scaleBatch).
+        Adjust Batch Size (class diagram: Recipe.scaleBatch).
         Returns [(ingredient, unit, scaled quantity)] for multiplier x the recipe.
         Nothing is saved; the stored recipe stays the same.
         """
@@ -86,7 +86,7 @@ class Recipe(models.Model):
 
     def get_missing_ingredients(self, pantry, multiplier=1):
         """
-        UC 53 Determine Missing Ingredients (class diagram: Recipe.getMissingIngredients).
+        Determine Missing Ingredients (class diagram: Recipe.getMissingIngredients).
         Returns [(ingredient, unit, needed, have)] for everything the pantry lacks.
         """
         have = {item.ingredient_id: item for item in pantry.items()}
