@@ -15,6 +15,19 @@ class SearchForm(forms.Form):
         required=False,
     )
 
+    items_per_page = forms.TypedChoiceField(
+        label="Recipes per page",
+        choices=((i, i) for i in (5, 10, 20, 50)),
+        required=False,
+        initial=10,
+        coerce=int,
+    )
+
+    name = forms.CharField(
+        label="Name",
+        required=False,
+    )
+
     ingredients = forms.ModelMultipleChoiceField(
         label="Ingredients",
         queryset=Ingredient.objects.all(),
