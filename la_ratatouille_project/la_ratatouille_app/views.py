@@ -3,9 +3,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
-from django.http import HttpResponse
 from .pantry import Pantry
 from .models import Ingredient, Recipe, Review, Favorite
 from .forms import BatchSizeForm, PantryItemForm, SearchForm, ReviewForm
@@ -107,7 +105,7 @@ def remove_comment(request, review_id):
 def search(request):
     '''Handle search requests'''
     form = SearchForm(request.GET)
-    recipe_page = None
+    context = {"form": form, "recipe_page": None}
     if len(request.GET) > 0 and form.is_valid():
         # user entered search terms
         name = form.cleaned_data.get("name")
@@ -164,7 +162,7 @@ def search(request):
         paginator = Paginator(recipes, items_per_page)
         page = request.GET.get("page", 1)
         recipe_page = paginator.get_page(page)
-        context = {"recipe_page": recipe_page, "form": form}
+        context["recipe_page"] = recipe_page
     return render(request, "la_ratatouille_app/search.html", context)
 
 
