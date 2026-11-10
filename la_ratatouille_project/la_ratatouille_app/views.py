@@ -1,4 +1,5 @@
-
+from django.contrib.auth import authenticate, login, logout
+from .forms import SignUpForm
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
@@ -13,8 +14,7 @@ from django.core.paginator import Paginator
 
 # Home page
 def index(request):
-    return HttpResponse("Welcome to La Ratatouille. This page is under construction.")
-
+    return render(request, "la_ratatouille_app/home.html")
 
 # Add Comment
 @login_required
@@ -293,3 +293,41 @@ def recipe_detail(request, recipe_id):
         "missing": recipe.get_missing_ingredients(Pantry(request.user), multiplier),
     }
     return render(request, "la_ratatouille_app/recipe_detail.html", context)
+
+# User Authentication
+
+def signup(request):
+    if request.method == "POST":
+        form = SignUpForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)
+            return redirect("index")
+    else:
+        form = SignUpForm()
+
+    return render(request, "la_ratatouille_app/signup.html", {"form": form})
+
+
+def user_login(request):
+    if request.method == "POST":
+        username = request.POST.get("username")
+        password = request.POST.get("password")
+
+        user = authenticate(request, username=username, password=password)
+
+        if user is not None:
+            login(request, user)
+            return redirect("index")
+        else:
+            return render(request, "la_ratatouille_app/login.html", {
+                "error": "Invalid username or password."
+            })
+
+    return render(request, "la_ratatouille_app/login.html")
+
+
+@require_POST
+def user_logout(request):
+    logout(request)
+    return redirect("index")
