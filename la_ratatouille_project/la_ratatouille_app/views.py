@@ -10,10 +10,15 @@ from .models import Ingredient, Recipe, Review, Favorite
 from .forms import BatchSizeForm, PantryItemForm, SearchForm, ReviewForm
 from django.db.models import F, Q, Count, Avg
 from django.core.paginator import Paginator
+from django.contrib.auth.models import User
+from django import forms
 
 
 # Home page
 def index(request):
+    if not request.user.is_authenticated:
+        return redirect("login")
+
     return render(request, "la_ratatouille_app/home.html")
 
 # Add Comment
@@ -302,7 +307,7 @@ def signup(request):
         if form.is_valid():
             user = form.save()
             login(request, user)
-            return redirect("index")
+            return redirect("pantry")
     else:
         form = SignUpForm()
 
@@ -330,4 +335,41 @@ def user_login(request):
 @require_POST
 def user_logout(request):
     logout(request)
+    return redirect("login")
+
+class EditProfileForm(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = ["username", "email"]
+
+
+@login_required
+def profile(request):
+    return render(request, "la_ratatouille_app/profile.html")
+
+
+@login_required
+def edit_profile(request):
+    if request.method == "POST":
+        form = EditProfileForm(request.POST, instance=request.user)
+
+        if form.is_valid():
+            form.save()
+            return redirect("profile")
+    else:
+        form = EditProfileForm(instance=request.user)
+
+    return render(
+        request,
+        "la_ratatouille_app/edit_profile.html",
+        {"form": form},
+    )
+
+
+@login_required
+@require_POST
+def delete_account(request):
+    user = request.user
+    logout(request)
+    user.delete()
     return redirect("index")

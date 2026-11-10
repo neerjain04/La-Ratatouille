@@ -1,0 +1,27 @@
+{% extends "la_ratatouille_app/base.html" %}
+
+{% block body %}
+<h1>My Profile</h1>
+
+<p><strong>Username:</strong> {{ user.username }}</p>
+<p><strong>Email:</strong> {{ user.email }}</p>
+
+<a href="{% url 'edit_profile' %}">Edit Profile</a>
+
+<h2>Log Out</h2>
+
+<form method="POST" action="{% url 'logout' %}">
+    {% csrf_token %}
+    <button type="submit">Log Out</button>
+</form>
+
+<h2>Delete Account</h2>
+<p>Warning: Deleting your account is permanent.</p>
+
+<form method="POST"
+      action="{% url 'delete_account' %}"
+      onsubmit="return confirm('Are you sure you want to delete your account?');">
+    {% csrf_token %}
+    <button type="submit">Delete My Account</button>
+</form>
+{% endblock %}
