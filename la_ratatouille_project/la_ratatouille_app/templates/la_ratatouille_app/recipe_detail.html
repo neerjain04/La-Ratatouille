@@ -77,7 +77,7 @@
           action="{% url 'add_comment' recipe.id %}">
         {% csrf_token %}
 
-        {{ form.as_p }}
+        {{ review_form.as_p }}
 
         <button type="submit">
             Submit Review
@@ -87,11 +87,15 @@
 {% else %}
     <p>Please log in to leave a review.</p>
 {% endif %}
+
 <h1>{{ recipe.name }}</h1>
 <p>Makes {{ recipe.num_servings }} serving{{ recipe.num_servings|pluralize }}. Prep time {{ recipe.prep_time }} min.</p>
 
-{# djust Batch Size #}
-<form method="get">{{ form.as_p }}<button>Adjust batch size</button></form>
+{# Adjust Batch Size #}
+<form method="get">
+    {{ form.as_p }}
+    <button>Adjust batch size</button>
+</form>
 
 <h2>Ingredients for {{ servings }} serving{{ servings|pluralize }}</h2>
 <ul>
@@ -111,8 +115,12 @@
     {% endfor %}
   </ul>
 {% endif %}
+
 <p><a href="{% url 'pantry' %}">My pantry</a></p>
+
 <h2>Instructions</h2>
 <p>{{ recipe.instructions|linebreaksbr }}</p>
+
 {% endblock %}
+
 
