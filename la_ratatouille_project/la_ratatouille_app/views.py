@@ -1,21 +1,21 @@
 from functools import reduce
 
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
+from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
-from django.db.models import Q
 from django.http import HttpResponse
 from django.views.decorators.http import require_POST
 from .pantry import Pantry
 from .models import Ingredient, Recipe, Review, Favorite
-from .forms import BatchSizeForm, PantryItemForm, SearchForm, ReviewForm
+from .forms import BatchSizeForm, PantryItemForm, SearchForm, ReviewForm, SignUpForm
 from django.db.models import F, Q, Count, Avg
 from django.core.paginator import Paginator
 
 
 # Home page
 def index(request):
-    return HttpResponse("Welcome to La Ratatouille. This page is under construction.")
-
+    return render(request, "la_ratatouille_app/home.html")
 
 # Add Comment
 @login_required
@@ -57,7 +57,7 @@ def add_comment(request, recipe_id):
     return HttpResponse("Invalid rating or comment.", status=400)
 
 
-# Display recipe: reviews, favorite, batch size (UC 51) and missing ingredients (UC 53)
+# Display recipe: reviews, favorite, batch size and missing ingredients 
 def recipe_detail(request, recipe_id):
 
     recipe = get_object_or_404(Recipe, id=recipe_id)
@@ -70,7 +70,7 @@ def recipe_detail(request, recipe_id):
     multiplier = recipe.multiplier_for(servings)
     lines = recipe.scale_batch(multiplier)
 
-    # Check if the user has favorited this recipe, and (UC 53) what their pantry is missing
+    # Check if the user has favorited this recipe, and what their pantry is missing
     is_favorite = False
     missing = None
 
@@ -255,7 +255,7 @@ def unfavorite_recipe(request, recipe_id):
     return redirect("recipe_detail", recipe_id=recipe_id)
 
 
-# ---------------------------------------------------------------- Pantry (UC 52, 54, 55)
+# ---------------------------------------------------------------- Pantry
 @login_required
 def pantry(request):
     """Show the user's pantry and handle the add/edit form (UC 52)."""
@@ -290,3 +290,57 @@ def pantry_delete(request):
         messages.success(request, f"Deleted your pantry ({count} ingredients).")
         return redirect("pantry")
     return render(request, "la_ratatouille_app/pantry_confirm_delete.html")
+
+
+# ---------------------------------------------------------------- Recipe page
+@login_required
+def recipe_detail(request, recipe_id):
+    """UC 51: ?servings=N rescales the ingredients. UC 53: lists what the pantry is missing."""
+    recipe = get_object_or_404(Recipe, pk=recipe_id)
+    form = BatchSizeForm(request.GET or None, initial={"servings": recipe.num_servings})
+    servings = form.cleaned_data["servings"] if form.is_valid() else recipe.num_servings
+    multiplier = recipe.multiplier_for(servings)
+    context = {
+        "recipe": recipe, "form": form, "servings": servings,
+        "lines": recipe.scale_batch(multiplier),
+        "missing": recipe.get_missing_ingredients(Pantry(request.user), multiplier),
+    }
+    return render(request, "la_ratatouille_app/recipe_detail.html", context)
+
+# User Authentication
+
+def signup(request):
+    if request.method == "POST":
+        form = SignUpForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)
+            return redirect("index")
+    else:
+        form = SignUpForm()
+
+    return render(request, "la_ratatouille_app/signup.html", {"form": form})
+
+
+def user_login(request):
+    if request.method == "POST":
+        username = request.POST.get("username")
+        password = request.POST.get("password")
+
+        user = authenticate(request, username=username, password=password)
+
+        if user is not None:
+            login(request, user)
+            return redirect("index")
+        else:
+            return render(request, "la_ratatouille_app/login.html", {
+                "error": "Invalid username or password."
+            })
+
+    return render(request, "la_ratatouille_app/login.html")
+
+
+@require_POST
+def user_logout(request):
+    logout(request)
+    return redirect("index")
