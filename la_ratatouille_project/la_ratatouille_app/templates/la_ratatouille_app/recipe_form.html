@@ -1,0 +1,32 @@
+{% extends "la_ratatouille_app/base.html" %}
+{% block body %}
+<h1>{{ title }}</h1>
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <h2>Ingredients</h2>
+    {{ ingredient_formset.management_form }}
+    {{ ingredient_formset.non_form_errors }}
+    <div id="ingredient-forms">
+        {% for ingredient_form in ingredient_formset %}
+            <div class="ingredient-form">{{ ingredient_form.as_p }}</div>
+        {% endfor %}
+    </div>
+    <template id="empty-ingredient-form">
+        <div class="ingredient-form">{{ ingredient_formset.empty_form.as_p }}</div>
+    </template>
+    <button type="button" id="add-ingredient">Add another ingredient</button>
+    <button type="submit">Save recipe</button>
+</form>
+<script>
+    // Django uses the management form's count to process newly added ingredient rows.
+    document.getElementById("add-ingredient").addEventListener("click", function () {
+        const total = document.getElementById("id_{{ ingredient_formset.prefix }}-TOTAL_FORMS");
+        const template = document.getElementById("empty-ingredient-form").innerHTML;
+        document.getElementById("ingredient-forms").insertAdjacentHTML(
+            "beforeend", template.replaceAll("__prefix__", total.value)
+        );
+        total.value = Number(total.value) + 1;
+    });
+</script>
+{% endblock %}

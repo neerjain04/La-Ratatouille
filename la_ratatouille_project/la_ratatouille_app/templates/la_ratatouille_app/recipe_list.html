@@ -1,0 +1,11 @@
+{% extends "la_ratatouille_app/base.html" %}
+{% block body %}
+<h1>{{ title }}</h1>
+<ul>
+    {% for recipe in recipes %}
+        <li><a href="{% url 'recipe_detail' recipe.id %}">{{ recipe.name }}</a></li>
+    {% empty %}
+        <li>No recipes to show.</li>
+    {% endfor %}
+</ul>
+{% endblock %}

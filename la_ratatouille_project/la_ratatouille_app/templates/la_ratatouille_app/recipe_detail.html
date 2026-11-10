@@ -4,6 +4,18 @@
 {% block body %}
 
 <h1>{{ recipe.name }}</h1>
+{% if user == recipe.user %}
+    <p><a href="{% url 'recipe_edit' recipe.id %}">Edit recipe</a>
+       <a href="{% url 'recipe_delete' recipe.id %}">Delete recipe</a></p>
+{% endif %}
+<p>Average rating: {% if average_rating != None %}{{ average_rating|floatformat:1 }} / 5{% else %}Not rated yet{% endif %}</p>
+{% if user.is_authenticated %}
+    <form method="post" action="{% url 'rate_recipe' recipe.id %}">
+        {% csrf_token %}
+        {{ rating_form.as_p }}
+        <button type="submit">Save rating</button>
+    </form>
+{% endif %}
 
 <!-- Favorite and Unfavorite Recipe -->
 {% if user.is_authenticated %}
@@ -77,7 +89,7 @@
           action="{% url 'add_comment' recipe.id %}">
         {% csrf_token %}
 
-        {{ form.as_p }}
+        {{ review_form.as_p }}
 
         <button type="submit">
             Submit Review
@@ -91,7 +103,7 @@
 <p>Makes {{ recipe.num_servings }} serving{{ recipe.num_servings|pluralize }}. Prep time {{ recipe.prep_time }} min.</p>
 
 {# djust Batch Size #}
-<form method="get">{{ form.as_p }}<button>Adjust batch size</button></form>
+<form method="get">{{ batch_form.as_p }}<button>Adjust batch size</button></form>
 
 <h2>Ingredients for {{ servings }} serving{{ servings|pluralize }}</h2>
 <ul>
@@ -115,4 +127,3 @@
 <h2>Instructions</h2>
 <p>{{ recipe.instructions|linebreaksbr }}</p>
 {% endblock %}
-
