@@ -1,6 +1,8 @@
 from django import forms
 from .models import Ingredient, Tag, Review, Unit
 from django.core.validators import MinValueValidator, MaxValueValidator
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.models import User
 
 # Search Form
 class SearchForm(forms.Form):
@@ -94,3 +96,20 @@ class PantryItemForm(forms.Form):
 class BatchSizeForm(forms.Form):
     """UC 51: how many servings to make."""
     servings = forms.IntegerField(min_value=1, max_value=500)
+
+class SignUpForm(UserCreationForm):
+    # Add an email field to the signup form
+    email = forms.EmailField(required=True)
+
+    class Meta:
+        model = User
+        fields = ["username", "email", "password1", "password2"]
+
+    # Make sure an email is not already registered
+    def clean_email(self):
+        email = self.cleaned_data["email"]
+
+        if User.objects.filter(email__iexact=email).exists():
+            raise forms.ValidationError("This email is already registered.")
+
+        return email
