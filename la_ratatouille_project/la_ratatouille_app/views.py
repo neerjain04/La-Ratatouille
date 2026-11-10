@@ -4,13 +4,12 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 from django.http import HttpResponse
-from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
-from django.http import HttpResponse
 from .pantry import Pantry
 from .models import Ingredient, Recipe, Review, Favorite
 from .forms import BatchSizeForm, PantryItemForm, SearchForm, ReviewForm
 from django.db.models import F, Q, Count, Avg
+from django.core.paginator import Paginator
 
 
 # Home page
@@ -119,9 +118,10 @@ def remove_comment(request, review_id):
 def search(request):
     '''Handle search requests'''
     form = SearchForm(request.GET)
-    recipes = {}
+    context = {"form": form, "recipe_page": None}
     if len(request.GET) > 0 and form.is_valid():
         # user entered search terms
+        name = form.cleaned_data.get("name")
         ingredients = form.cleaned_data.get("ingredients")
         tags = form.cleaned_data.get("tags")
         min_rating = form.cleaned_data.get("min_rating")
@@ -129,6 +129,8 @@ def search(request):
         max_prep_time = form.cleaned_data.get("max_prep_time")
         recipes = Recipe.objects
 
+        if name is not None:
+            recipes = recipes.filter(name__istartswith=name)
         if max_prep_time is not None:
             recipes = recipes.filter(prep_time__lte=max_prep_time) 
         if len(ingredients) > 0:
@@ -139,7 +141,6 @@ def search(request):
                 recipes = recipes.filter(tags=tag)
 
         recipes = Recipe.objects.filter(id__in=recipes.values_list("id"))
-
 
         # annotate with avg rating and ingredient count
         recipes = recipes.annotate(
@@ -170,7 +171,11 @@ def search(request):
         else:              
             recipes = recipes.order_by(sort_criteria, "name")
 
-    context = {"recipes": recipes, "form": form}
+        items_per_page = form.cleaned_data.get("items_per_page", 10)
+        paginator = Paginator(recipes, items_per_page)
+        page = request.GET.get("page", 1)
+        recipe_page = paginator.get_page(page)
+        context["recipe_page"] = recipe_page
     return render(request, "la_ratatouille_app/search.html", context)
 
 

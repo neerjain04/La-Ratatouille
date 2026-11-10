@@ -5,6 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>La Ratatouille</title>
 </head>
+<header>
+    <h1>La Ratatouille</h1>
+    <nav>
+        <a href="{% url 'search' %}">Search</a>
+        <a href="{% url 'pantry' %}">My Pantry</a>
+        My Recipes
+        Favorites
+        Profile
+    </nav>
+</header>
 <body>
 {% block body %}
 {% endblock %}
