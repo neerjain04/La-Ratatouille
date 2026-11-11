@@ -1,0 +1,391 @@
+name,food_group,recipe_count
+Salt,herb_spice,5698
+Onion,vegetable,2530
+Sunflower Oil,oil_fat,2241
+Garlic,vegetable,2227
+Turmeric powder (Haldi),herb_spice,2221
+Green Chillies,vegetable,2170
+Coriander (Dhania) Leaves,herb_spice,1813
+Red Chilli powder,herb_spice,1812
+Ginger,vegetable,1680
+Cumin seeds (Jeera),herb_spice,1531
+Sugar,baking,1291
+Curry leaves,herb_spice,1270
+Mustard seeds,herb_spice,1263
+Tomatoes,vegetable,1263
+Dry Red Chillies,herb_spice,997
+Asafoetida (hing),herb_spice,961
+Extra Virgin Olive Oil,oil_fat,929
+Black pepper powder,herb_spice,883
+Lemon juice,fruit,881
+Coriander Powder (Dhania),herb_spice,854
+Milk,dairy,830
+Fresh coconut,fruit,786
+Cumin powder (Jeera),herb_spice,783
+All Purpose Flour (Maida),grain,705
+Carrot (Gajjar),vegetable,688
+Oil,oil_fat,641
+Potatoes (Aloo),vegetable,611
+Whole Black Peppercorns,herb_spice,604
+Cinnamon Stick (Dalchini),herb_spice,603
+Whole Wheat Flour,grain,596
+Whole Eggs,protein,577
+Cloves (Laung),herb_spice,515
+Cardamom (Elaichi) Pods/Seeds,herb_spice,499
+White Urad Dal (Split),legume,496
+Jaggery,baking,495
+Bay leaf (tej patta),herb_spice,486
+Mint Leaves (Pudina),herb_spice,447
+Green Bell Pepper (Capsicum),vegetable,396
+Cashew nuts,nut_seed,392
+Cardamom Powder (Elaichi),herb_spice,384
+Vanilla Extract,baking,382
+Gram flour (besan),grain,378
+Honey,baking,378
+Fennel seeds (Saunf),herb_spice,375
+Baking powder,baking,347
+Coriander (Dhania) Seeds,herb_spice,344
+Butter (unsalted),dairy,336
+Methi Seeds (Fenugreek Seeds),herb_spice,332
+Red Chilli flakes,herb_spice,332
+Chana dal (Bengal Gram Dal),legume,331
+Fresh cream,dairy,302
+Green peas (Matar),vegetable,292
+Sesame seeds (Til seeds),nut_seed,290
+Red Bell pepper (Capsicum),vegetable,280
+Mustard oil,oil_fat,274
+Sesame (Gingelly) Oil,oil_fat,274
+Ajwain (Carom seeds),herb_spice,270
+Chaat Masala Powder,herb_spice,253
+Corn flour,grain,253
+Dried oregano,herb_spice,245
+Badam (Almond),nut_seed,242
+Coconut milk,dairy,238
+Cinnamon Powder (Dalchini),herb_spice,237
+Amchur (Dry Mango Powder),herb_spice,236
+Button mushrooms,vegetable,235
+Saffron strands,herb_spice,231
+Lemon,fruit,225
+Rice,grain,220
+Basil leaves,herb_spice,212
+Caster Sugar,baking,212
+Rice flour,grain,211
+Green beans (French Beans),vegetable,208
+Coconut Oil,oil_fat,203
+Arhar dal (Split Toor Dal),legume,201
+Hung Curd (Greek Yogurt),dairy,188
+Baking soda,baking,187
+Brown Sugar (Demerara Sugar),baking,187
+Tamarind,fruit,187
+Sweet corn,vegetable,185
+Mango (Ripe),fruit,183
+Parsley leaves,herb_spice,178
+Instant Oats (Oatmeal),grain,176
+Sooji (Semolina/ Rava),grain,175
+Kashmiri Red Chilli Powder,herb_spice,174
+Pistachios,nut_seed,174
+Roasted Peanuts (Moongphali),nut_seed,168
+Spring Onion (Bulb & Greens),vegetable,165
+Spring Onion Greens,vegetable,163
+Spinach Leaves (Palak),vegetable,162
+Kasuri Methi (Dried Fenugreek Leaves),herb_spice,159
+Poppy seeds,nut_seed,158
+Cauliflower (gobi),vegetable,156
+Cucumber,vegetable,155
+Yellow Moong Dal (Split),legume,154
+Ripe Bananas,fruit,148
+Walnuts,nut_seed,148
+Basmati rice,grain,147
+Raisins,fruit,147
+Mozzarella cheese,dairy,145
+Cabbage (Patta Gobi/ Muttaikose),vegetable,144
+Chicken,protein,141
+Cocoa Powder,baking,140
+Broccoli,vegetable,136
+Raw Peanuts (Moongphali),nut_seed,136
+Whole Wheat Bread crumbs,grain,135
+Chicken breasts,protein,128
+Brinjal (Baingan / Eggplant),vegetable,120
+Methi Leaves (Fenugreek Leaves),herb_spice,120
+Pearl onions (Sambar Onions),vegetable,120
+Black cardamom (Badi Elaichi),herb_spice,115
+Spinach,vegetable,111
+Parmesan cheese,dairy,109
+Kaddu (Parangikai/ Pumpkin),vegetable,107
+Beetroot,vegetable,104
+Kabuli Chana (White Chickpeas),legume,104
+Paprika powder,herb_spice,104
+Cheddar cheese,dairy,103
+Green zucchini,vegetable,103
+Apple,fruit,102
+Dates,fruit,101
+Vinegar,condiment,101
+Cheese,dairy,100
+Tofu,protein,99
+Dry ginger powder,herb_spice,96
+Star anise,herb_spice,96
+Black Salt (Kala Namak),herb_spice,93
+Sweet Potatoes,vegetable,92
+Kalonji (Onion Nigella Seeds),herb_spice,91
+Dessicated Coconut,fruit,90
+Nutmeg powder,herb_spice,89
+Strawberries,fruit,87
+Yellow Bell Pepper (Capsicum),vegetable,86
+Cooked rice,grain,84
+Tomato Ketchup,condiment,84
+Condensed Milk,dairy,83
+Mutton,protein,83
+Green Moong Dal (Whole),legume,80
+Shallots,vegetable,80
+Mixed Herbs (Dried),herb_spice,77
+Rajma (Large Kidney Beans),legume,74
+Black Urad Dal (Split),legume,72
+Ragi Flour (Finger Millet/ Nagli),grain,72
+Bhindi (Lady Finger/Okra),vegetable,71
+Pineapple,fruit,70
+Bottle gourd (lauki),vegetable,69
+Dark chocolate,baking,69
+Rosemary,herb_spice,69
+Black olives,vegetable,68
+Kala Chana (Brown Chickpeas),legume,68
+Cherry tomatoes,vegetable,67
+Fresh Red chillies,vegetable,67
+Heavy whipping cream,dairy,67
+Iceberg lettuce,vegetable,65
+Mooli/ Mullangi (Radish),vegetable,65
+Icing Sugar,baking,64
+Lemon zest,fruit,63
+Mixed nuts,nut_seed,63
+Pickled Jalapenos,condiment,63
+Eno fruit salt,baking,62
+Poha (Flattened rice),grain,62
+Baby corn,vegetable,60
+Cream Cheese,dairy,59
+Fresh orange juice,fruit,59
+Peanut Butter,condiment,59
+Chocolate chips,baking,58
+Dried Thyme Leaves,herb_spice,58
+Dry coconut (kopra),fruit,58
+Whole Almonds (Badam),nut_seed,57
+Red Yellow and Green Bell Peppers (Capsicum),vegetable,56
+Rose water,herb_spice,56
+Dill leaves,herb_spice,55
+Masoor Dal (Whole),legume,55
+Flax seed powder (flax meal),nut_seed,54
+Avocado,fruit,53
+Buttermilk,dairy,53
+Feta Cheese,dairy,52
+Fresh Thyme leaves,herb_spice,52
+Prawns,protein,52
+Raw Banana,fruit,52
+Anardana Powder (Pomegranate Seed Powder),herb_spice,51
+Baby Potatoes,vegetable,49
+Boneless chicken,protein,49
+Tortillas,grain,49
+Fresh Pomegranate Fruit Kernels,fruit,48
+Lemongrass,herb_spice,48
+Orange,fruit,48
+Orange Zest (Rind),fruit,48
+Mace (Javitri),herb_spice,47
+Drumstick,vegetable,46
+Italian seasoning,herb_spice,46
+Celery,vegetable,44
+Red onion,vegetable,44
+Cranberries,fruit,43
+Elephant yam (Suran/Senai/Ratalu),vegetable,42
+Fennel Powder,herb_spice,42
+Karela (Bitter Gourd/ Pavakkai),vegetable,42
+Sev,grain,42
+Sultana Raisins,fruit,42
+Chia Seeds,nut_seed,41
+Khoya (Mawa),dairy,41
+Quinoa,grain,40
+Roasted Gram Dal (Pottukadalai),legume,40
+Kokum (Malabar Tamarind),fruit,39
+Mixed vegetables,vegetable,39
+Slivered Almonds (Badam),nut_seed,39
+Black Eyed Beans (Lobia),legume,38
+Milk Powder,dairy,38
+Garlic powder,herb_spice,37
+Nutmeg,herb_spice,37
+Bajra Flour (Pearl Millet),grain,36
+Small Brinjal (Baingan / Eggplant),vegetable,36
+Jowar Flour (Sorghum),grain,35
+Instant Coffee Powder,beverage,34
+Classic Mayonnaise (With Egg),condiment,33
+Foxtail Millet,grain,33
+Egg whites,protein,32
+Broken Wheat (Dalia/ Godumai Rava),grain,31
+Dijon Mustard,condiment,31
+Lemon wedges,fruit,31
+Horse Gram Dal (Kollu/ Kulith),legume,30
+Penne pasta,grain,30
+Brown Rice,grain,29
+Byadagi Dried Chillies,herb_spice,29
+Chilli vinegar,condiment,29
+Spaghetti Pasta,grain,29
+Black pepper corns,herb_spice,28
+Colocasia root (Arbi),vegetable,28
+Kashmiri dry red chillies,herb_spice,28
+Soy Chunks (Nuggets),protein,28
+Apple cider vinegar,condiment,27
+Kiwi,fruit,27
+Makki Ka Atta (Yellow Corn Meal Flour),grain,27
+Maple syrup,baking,27
+Ridge Gourd (Turai/ Peerkangai),vegetable,27
+Sabudana (Tapioca Pearls),grain,27
+Balsamic Vinegar,condiment,26
+Egg yolks,protein,26
+Oats Flour,grain,26
+Raw papaya,fruit,26
+Red Wine Vinaigrette,condiment,26
+Rice Vinegar,condiment,26
+Rolled Oats Or Instant Oats,grain,26
+Cooking soda,baking,25
+Muesli,grain,25
+Pav bhaji masala,herb_spice,25
+Rock Salt,herb_spice,25
+Gelatin,baking,24
+Sea salt,herb_spice,24
+Sunflower seeds,nut_seed,24
+Watermelon,fruit,24
+Drumstick Leaves (Moringa/Murungai Keerai),vegetable,23
+Flax seeds,nut_seed,23
+Green Chilli Paste,condiment,23
+White vinegar,condiment,23
+Whole cashews,nut_seed,23
+Black sesame seeds,nut_seed,22
+Palm sugar,baking,22
+Rasam Powder,herb_spice,22
+White pepper powder,herb_spice,22
+Cayenne Pepper,herb_spice,21
+Thai Red chilli (Birds Eye Chilli),vegetable,21
+Tindora (Dondakaya/ Kovakkai),vegetable,21
+Dried Figs,fruit,20
+Phool Makhana (Lotus Seeds),nut_seed,20
+Ricotta Cheese,dairy,20
+Shrimps,protein,20
+Amla (Nellikai/ Gooseberry),fruit,19
+Baguette,grain,19
+Blueberries,fruit,19
+Boondi,grain,19
+Burger buns,grain,19
+English Cucumber,vegetable,19
+Hakka Noodles,grain,19
+Puffed rice,grain,19
+Semiya (Vermicelli),grain,19
+Tahini,condiment,19
+Apricots,fruit,18
+Cheese Block,dairy,18
+Jackfruit Raw (Kathal),fruit,18
+Rose Petals,herb_spice,18
+Bean Sprouts,legume,17
+Buckwheat Flour (Kuttu Ka Atta),grain,17
+Custard powder,baking,17
+Dried basil leaves,herb_spice,17
+Fresh Cherries,fruit,17
+Mixed dry fruits,nut_seed,17
+Avarekalu / Lilva Beans,legume,16
+Barnyard Millet,grain,16
+Chocolate Bar,baking,16
+Curry powder,herb_spice,16
+Fresh Herbs,herb_spice,16
+Gawar Phali (Kothavarangai / Cluster beans),vegetable,16
+Kaffir lime leaves,herb_spice,16
+Leek,vegetable,16
+Lettuce leaves,vegetable,16
+Pav buns,grain,16
+Purple cabbage,vegetable,16
+Aerated water (Soda Water),beverage,15
+Fresh Figs,fruit,15
+Green Amaranth Leaves,vegetable,15
+Mangalorean cucumber,vegetable,15
+Nutella Spread,condiment,15
+Ragi Seeds,grain,15
+Rice Noodles (Flat),grain,15
+Rolled Oats,grain,15
+Vellai Poosanikai (Ash gourd/White Pumpkin),vegetable,15
+White Chocolate,baking,15
+Yellow Zucchini,vegetable,15
+Chicken stock,condiment,14
+Dark Chocolate Chips,baking,14
+Dry Fruits,nut_seed,14
+Fresh fruits,fruit,14
+Melon seeds,nut_seed,14
+Papaya,fruit,14
+Pumpkin seeds,nut_seed,14
+Red matta rice,grain,14
+Badi (wadi),legume,13
+Banana Stem,vegetable,13
+Barley (seeds),grain,13
+Chocolate ganache,baking,13
+Date syrup,baking,13
+Double Cream,dairy,13
+Dried rose petals,herb_spice,13
+Fish,protein,13
+Fish fillet,protein,13
+Kala jeera,herb_spice,13
+Marie Biscuit,grain,13
+Methi Powder (Fenugreek Powder),herb_spice,13
+Pointed gourd (Parval),vegetable,13
+Prunes,fruit,13
+Soy granules,protein,13
+Tandoori masala,herb_spice,13
+Thai basil leaves,herb_spice,13
+Achari Mayo,condiment,12
+Baby spinach,vegetable,12
+Black Rice,grain,12
+Bok Choy,vegetable,12
+Canola Oil,oil_fat,12
+Cheese spread,condiment,12
+Jowar Seeds,grain,12
+Mascarpone Cheese,dairy,12
+Mixed fruits,fruit,12
+Onion powder,herb_spice,12
+Palm jaggery,baking,12
+Rajgira Flour (Amaranth Flour),grain,12
+Rice Wine Vinegar,condiment,12
+Salted butter,dairy,12
+Sichuan peppercorns,herb_spice,12
+Soybeans (Whole Soya dal),legume,12
+Veg Hakka Noodles,grain,12
+Black beans,legume,11
+Chenna (Homemade Cottage Cheese),dairy,11
+Chironji,nut_seed,11
+Chives,herb_spice,11
+Decorative sugar (Cake/ Candy Sprinkles),baking,11
+Dosa rice,grain,11
+Dry mix herbs,herb_spice,11
+Goat Cheese,dairy,11
+Groundnut powder,nut_seed,11
+Gulkand,condiment,11
+Jackfruit Ripe (Kathal),fruit,11
+Lotus Stem,vegetable,11
+Oreo biscuits,grain,11
+Papad,grain,11
+Peaches,fruit,11
+Pink Masoor Dal (Split),legume,11
+Red cabbage,vegetable,11
+Rice Vermicelli Noodles (Thin),grain,11
+Soy milk,dairy,11
+Stone flower,herb_spice,11
+Tender coconut water,beverage,11
+Tulsi (holy basil),herb_spice,11
+Arugula leaves,vegetable,10
+Avarekai (Broad Beans),legume,10
+Basa fish,protein,10
+Caramelized onions,vegetable,10
+Coconut Sugar,baking,10
+Couscous,grain,10
+Edible Silver Foil/Leaf (Chandi Ka Vark),baking,10
+Egg noodles,grain,10
+Green olives,vegetable,10
+Hard taco shells,grain,10
+Mace powder,herb_spice,10
+Mooli Ke Patte (Radish Greens),vegetable,10
+Pine nuts,nut_seed,10
+Turnips,vegetable,10
+Urad Dal Flour,legume,10
+Wheat Bran,grain,10
+White wine vinegar,condiment,10
+Yellow mustard seeds,herb_spice,10

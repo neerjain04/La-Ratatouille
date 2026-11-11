@@ -22,7 +22,7 @@ class Pantry:
         """Just the Ingredient objects, using the existing user.pantry manager."""
         return self.user.pantry.all()
 
-    # ------------------------------------------------------------ Create Pantry
+    # ------------------------------------------------------------ 3.1.26 Create Pantry
     @classmethod
     def create(cls, user, starting_items=()):
         """Start a pantry. It is empty unless starting_items [(ingredient, unit, qty)] are given."""
@@ -31,13 +31,13 @@ class Pantry:
             pantry.add_ingredient(ingredient, quantity, unit)
         return pantry
 
-    # ------------------------------------------------------------ Delete Pantry
+    # ------------------------------------------------------------ 3.1.27 Delete Pantry
     def delete(self):
         """Remove every ingredient from the pantry. Returns how many were removed."""
         deleted, _ = self.user.user_ingredients.all().delete()
         return deleted
 
-    # ------------------------------------------------------------ Edit Ingredient in Pantry
+    # ------------------------------------------------------------ 3.1.18 Edit Ingredient in Pantry
     def add_ingredient(self, ingredient, quantity, unit=None):
         """Add an ingredient or change its amount. 0 removes it. (class diagram: addIngredient)"""
         quantity = int(quantity)
@@ -57,7 +57,7 @@ class Pantry:
         deleted, _ = self.user.user_ingredients.filter(ingredient=ingredient).delete()
         return deleted > 0
 
-    # ------------------------------------------------------------ UC 53 (yes/no version)
+    # ------------------------------------------------------------ 3.1.25 (yes/no version)
     def check_recipe_ingredients(self, recipe, multiplier=1):
         """True if the pantry has everything the recipe needs. (class diagram: checkRecipeIngredients)"""
         return not recipe.get_missing_ingredients(self, multiplier)

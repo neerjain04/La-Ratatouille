@@ -35,4 +35,8 @@ urlpatterns = [
     path("pantry/", views.pantry, name="pantry"),                                 
     path("pantry/delete/", views.pantry_delete, name="pantry_delete"),            
     path("pantry/remove/<int:ingredient_id>/", views.pantry_remove_item, name="pantry_remove_item"), 
+
+    # Recipe AI (3.1.29 Generate, 3.1.30 Save)
+    path("ai/recipe/", views.ai_generate_recipe, name="ai_generate_recipe"),
+    path("ai/recipe/save/", views.ai_save_recipe, name="ai_save_recipe"),
 ]

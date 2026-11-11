@@ -3,23 +3,29 @@
 <h1>My pantry</h1>
 {% for message in messages %}<p><strong>{{ message }}</strong></p>{% endfor %}
 
+{# 3.1.18: the pantry is listed under its food groups (items arrive sorted by group from the view) #}
+{% regroup items by ingredient.get_food_group_display as groups %}
 <table>
   <tr><th>Ingredient</th><th>Amount</th><th></th></tr>
-  {% for item in items %}
-    <tr>
-      <td>{{ item.ingredient }}</td>
-      <td>{{ item.quantity }} {{ item.unit|default:"" }}</td>
-      <td><form method="post" action="{% url 'pantry_remove_item' item.ingredient.id %}">{% csrf_token %}<button>Remove</button></form></td>
-    </tr>
+  {% for group in groups %}
+    <tr><th colspan="3" class="food-group">{{ group.grouper }}</th></tr>
+    {% for item in group.list %}
+      <tr>
+        <td>{{ item.ingredient }}</td>
+        <td>{{ item.quantity }} {{ item.unit|default:"" }}</td>
+        <td><form method="post" action="{% url 'pantry_remove_item' item.ingredient.id %}">{% csrf_token %}<button>Remove</button></form></td>
+      </tr>
+    {% endfor %}
   {% empty %}
-    {# UC 54: a new user's pantry starts empty #}
+    {# 3.1.26: a new user's pantry starts empty #}
     <tr><td colspan="3">Your pantry is empty. Add your first ingredient below.</td></tr>
   {% endfor %}
 </table>
 
 <h2>Add or change an ingredient</h2>
-<p>Pick an ingredient already in your pantry to change its amount. Set the amount to 0 to remove it.</p>
+<p>The ingredient menu is split into food groups. Pick an ingredient already in your pantry to change its amount. Set the amount to 0 to remove it.</p>
 <form method="post">{% csrf_token %}{{ form.as_p }}<button>Save</button></form>
 
+<p><a href="{% url 'ai_generate_recipe' %}">Make a recipe from my pantry with AI</a></p>
 {% if items %}<p><a href="{% url 'pantry_delete' %}">Delete my pantry</a></p>{% endif %}
 {% endblock %}

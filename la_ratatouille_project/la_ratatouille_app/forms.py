@@ -86,11 +86,39 @@ class ReviewForm(forms.ModelForm):
         }
         required=False
 
+def grouped_ingredient_choices(ingredients, empty_label="---------"):
+    """Choices for an ingredient menu split into food groups: one <optgroup> per group, in FoodGroup order."""
+    by_group = {code: [] for code in Ingredient.FoodGroup.values}
+    for ingredient in ingredients:
+        by_group.get(ingredient.food_group, by_group["other"]).append((ingredient.pk, ingredient.name))
+    return [("", empty_label)] + [
+        (label, by_group[code]) for code, label in Ingredient.FoodGroup.choices if by_group[code]
+    ]
+
+
 class PantryItemForm(forms.Form):
-    """UC 52: add an ingredient or change its amount. Quantity 0 removes it."""
-    ingredient = forms.ModelChoiceField(queryset=Ingredient.objects.all())
+    """3.1.18: add an ingredient or change its amount. Quantity 0 removes it."""
+    ingredient = forms.ModelChoiceField(queryset=Ingredient.objects.order_by("name"))
     quantity = forms.IntegerField(min_value=0)
-    unit = forms.ModelChoiceField(queryset=Unit.objects.all(), required=False)
+    unit = forms.ModelChoiceField(queryset=Unit.objects.order_by("name"), required=False)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["ingredient"].choices = grouped_ingredient_choices(self.fields["ingredient"].queryset)
+
+
+class AIRecipeForm(forms.Form):
+    """3.1.29: options for the recipe AI."""
+    main_ingredient = forms.ModelChoiceField(queryset=Ingredient.objects.order_by("name"), required=False,
+                                             help_text="Leave blank to let the AI pick from your pantry.")
+    use_pantry = forms.BooleanField(required=False, initial=True, label="Prefer what's in my pantry")
+    servings = forms.IntegerField(min_value=1, max_value=12, initial=4)
+    size = forms.IntegerField(min_value=4, max_value=15, initial=10, label="Number of ingredients")
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["main_ingredient"].choices = grouped_ingredient_choices(
+            self.fields["main_ingredient"].queryset, empty_label="Let the AI choose")
 
 
 class BatchSizeForm(forms.Form):

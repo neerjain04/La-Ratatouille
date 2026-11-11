@@ -6,7 +6,15 @@ from .models import *
 
 admin.site.register(Tag)
 admin.site.register(Unit)
-admin.site.register(Ingredient)
+
+
+@admin.register(Ingredient)
+class IngredientAdmin(admin.ModelAdmin):
+    """Ingredients by food group, so the dataset load can be checked in /admin/."""
+    list_display = ["name", "food_group", "vegan", "gluten_free"]
+    list_filter = ["food_group"]
+    list_editable = ["food_group"]
+    search_fields = ["name"]
 
 class RecipeIngredientInline(admin.TabularInline):
     model = RecipeIngredient
