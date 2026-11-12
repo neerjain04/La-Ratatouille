@@ -57,7 +57,7 @@ class Pantry:
         deleted, _ = self.user.user_ingredients.filter(ingredient=ingredient).delete()
         return deleted > 0
 
-    # ------------------------------------------------------------ UC 53 (yes/no version)
+    # ------------------------------------------------------------ (yes/no version)
     def check_recipe_ingredients(self, recipe, multiplier=1):
         """True if the pantry has everything the recipe needs. (class diagram: checkRecipeIngredients)"""
         return not recipe.get_missing_ingredients(self, multiplier)

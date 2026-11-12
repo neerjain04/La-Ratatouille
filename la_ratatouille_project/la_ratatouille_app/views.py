@@ -57,20 +57,20 @@ def add_comment(request, recipe_id):
     return HttpResponse("Invalid rating or comment.", status=400)
 
 
-# Display recipe: reviews, favorite, batch size (UC 51) and missing ingredients (UC 53)
+# Display recipe: reviews, favorite, batch size and missing ingredients
 def recipe_detail(request, recipe_id):
 
     recipe = get_object_or_404(Recipe, id=recipe_id)
     reviews = Review.objects.filter(recipe=recipe)
     form = ReviewForm()
 
-    # UC 51 Adjust Batch Size: ?servings=N rescales the ingredient amounts
+    # Adjust Batch Size: ?servings=N rescales the ingredient amounts
     batch_form = BatchSizeForm(request.GET or None, initial={"servings": recipe.num_servings})
     servings = batch_form.cleaned_data["servings"] if batch_form.is_valid() else recipe.num_servings
     multiplier = recipe.multiplier_for(servings)
     lines = recipe.scale_batch(multiplier)
 
-    # Check if the user has favorited this recipe, and (UC 53) what their pantry is missing
+    # Check if the user has favorited this recipe, and what their pantry is missing
     is_favorite = False
     missing = None
 
@@ -209,10 +209,10 @@ def unfavorite_recipe(request, recipe_id):
     return redirect("recipe_detail", recipe_id=recipe_id)
 
 
-# ---------------------------------------------------------------- Pantry (UC 52, 54, 55)
+# ---------------------------------------------------------------- Pantry
 @login_required
 def pantry(request):
-    """Show the user's pantry and handle the add/edit form (UC 52)."""
+    """Show the user's pantry and handle the add/edit form."""
     my_pantry = Pantry(request.user)
     form = PantryItemForm(request.POST or None)
     if request.method == "POST" and form.is_valid():
@@ -229,7 +229,7 @@ def pantry(request):
 @login_required
 @require_POST
 def pantry_remove_item(request, ingredient_id):
-    """UC 52 alternate flow: remove one ingredient."""
+    """alternate flow: remove one ingredient."""
     ingredient = get_object_or_404(Ingredient, pk=ingredient_id)
     if Pantry(request.user).remove_ingredient(ingredient):
         messages.success(request, f"Removed {ingredient} from your pantry.")
@@ -238,7 +238,7 @@ def pantry_remove_item(request, ingredient_id):
 
 @login_required
 def pantry_delete(request):
-    """UC 55: GET shows a confirmation page, POST empties the pantry."""
+    """GET shows a confirmation page, POST empties the pantry."""
     if request.method == "POST":
         count = Pantry(request.user).delete()
         messages.success(request, f"Deleted your pantry ({count} ingredients).")
