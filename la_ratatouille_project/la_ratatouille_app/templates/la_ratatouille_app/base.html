@@ -10,12 +10,25 @@
     <nav>
         <a href="{% url 'search' %}">Search</a>
         <a href="{% url 'pantry' %}">My Pantry</a>
-        My Recipes
-        Favorites
-        <a href="{% url 'profile' %}">Profile</a>
+        <a href="{% url 'recipe_create' %}">Add recipe</a>
+        <a href="{% url 'my_recipes' %}">My Recipes</a>
+        <a href="{% url 'favorite_recipes' %}">Favorites</a>
+        Profile
+        {% if user.is_authenticated %}
+            <form action="{% url 'logout' %}" method="post" style="display: inline;">
+                {% csrf_token %}
+                <button type="submit">Log out</button>
+            </form>
+        {% else %}
+            <a href="{% url 'login' %}">Log in</a>
+            <a href="{% url 'signup' %}">Sign up</a>
+        {% endif %}
     </nav>
 </header>
 <body>
+{% for message in messages %}
+    <p>{{ message }}</p>
+{% endfor %}
 {% block body %}
 {% endblock %}
 <footer>

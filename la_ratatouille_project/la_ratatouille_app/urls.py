@@ -14,6 +14,12 @@ urlpatterns = [
     path("profile/delete/", views.delete_account, name="delete_account"),
     # Search feature from main
     path("search/", views.search, name="search"),
+    path("recipes/new/", views.recipe_create, name="recipe_create"),
+    path("recipes/mine/", views.my_recipes, name="my_recipes"),
+    path("recipes/favorites/", views.favorite_recipes, name="favorite_recipes"),
+    path("recipe/<int:recipe_id>/edit/", views.recipe_edit, name="recipe_edit"),
+    path("recipe/<int:recipe_id>/delete/", views.recipe_delete, name="recipe_delete"),
+    path("recipe/<int:recipe_id>/rate/", views.rate_recipe, name="rate_recipe"),
 
     # Display recipe and reviews
     path("recipe/<int:recipe_id>/", views.recipe_detail, name="recipe_detail"),
