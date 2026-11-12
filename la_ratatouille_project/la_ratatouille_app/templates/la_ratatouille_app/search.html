@@ -5,9 +5,57 @@
 {{ form }}
 <input type="submit" value="search" />
 </form>
-<ul>
-{% for recipe in recipes %}
-<li>{{ recipe }}</li>
-{% endfor %}
-</ul>
+{% if recipe_page is not None %}
+    {% if recipe_page %}
+    <table>
+        <thead>
+            <tr>
+                <td>Recipe Name</td>
+                <td>Rating</td>
+                <td>Preparation Time</td>
+                <td>Ingredient Count</td>
+                <td>Missing Ingredient Count</td>
+            </tr>
+        </thead>
+        <tbody>
+
+            {% for recipe in recipe_page %}
+            <tr>
+                <!-- TODO: Display recipe photo -->
+                <td><a href="{% url 'recipe_detail' recipe.id %}"><strong>{{ recipe.name }}</strong></a></td> 
+                <td>{{ recipe.rating }}</td> 
+                <td>{{ recipe.prep_time }}</td>
+                <td>{{ recipe.ingredient_count }}</td>
+                <td>    
+                    {% if request.user.is_authenticated %}
+                    {{ recipe.count_missing_ingredients }}
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+
+        </tbody>
+    </table>
+    <!--Adapted from "Pagination" https://docs.djangoproject.com/en/6.1/topics/pagination/ Retrieved 11/5/2026 -->
+    <div class="pagination">
+    <span class="step-links">
+        {% if recipe_page.has_previous %}
+            <a href="{% querystring page=1 %}">&laquo; first</a>
+            <a href="{% querystring page=recipe_page.previous_page_number %}">previous</a>
+        {% endif %}
+
+        <span class="current">
+            Page {{ recipe_page.number }} of {{ recipe_page.paginator.num_pages }}.
+        </span>
+
+        {% if recipe_page.has_next %}
+            <a href="{% querystring page=recipe_page.next_page_number %}">next</a>
+            <a href="{% querystring page=recipe_page.paginator.num_pages %}">last &raquo;</a>
+        {% endif %}
+    </span>
+    </div>
+    {% else %}
+    <p>Your search criteria matched zero recipes.</p>
+    {% endif %}
+{% endif %}
 {% endblock %}

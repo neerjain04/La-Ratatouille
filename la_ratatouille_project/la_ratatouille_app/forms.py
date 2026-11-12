@@ -1,17 +1,66 @@
-
 from django import forms
-from .models import Ingredient, Review, Unit
-
+from .models import Ingredient, Tag, Review, Unit
+from django.core.validators import MinValueValidator, MaxValueValidator
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.models import User
 
 # Search Form
 class SearchForm(forms.Form):
-    ingredients = forms.MultipleChoiceField(
+    order_by = forms.ChoiceField(
+        label="Sort by",
+        choices=(("name", "Alphabetical (A->Z)"),
+            ("-name", "Alphabetical (Z->A)"),
+            ("ingredient_count", "Ingredient count (lowest first)"),
+            ("prep_time", "Preparation Time (lowest first)"),
+            ("rating", "Rating (lowest first)"),
+            ("-rating", "Rating (highest first)"),),
+        required=False,
+    )
+
+    items_per_page = forms.TypedChoiceField(
+        label="Recipes per page",
+        choices=((i, i) for i in (5, 10, 20, 50)),
+        required=False,
+        initial=10,
+        coerce=int,
+    )
+
+    name = forms.CharField(
+        label="Name",
+        required=False,
+    )
+
+    ingredients = forms.ModelMultipleChoiceField(
         label="Ingredients",
-        choices=((i.id, i.name) for i in Ingredient.objects.all()),
+        queryset=Ingredient.objects.all(),
         widget=forms.CheckboxSelectMultiple,
         required=False,
     )
 
+    tags = forms.ModelMultipleChoiceField(
+        label="Tag",
+        queryset=Tag.objects.all(),
+        widget=forms.CheckboxSelectMultiple,
+        required=False,
+    )
+
+    min_rating = forms.FloatField(
+        label="Minimum rating",
+        required=False,
+        validators=[MinValueValidator(limit_value=1), MaxValueValidator(limit_value=5)],
+    )
+
+    max_ingredient_count = forms.IntegerField(
+        label="Maximum ingredient count",
+        required=False,
+        validators=[MinValueValidator(limit_value=1),],
+    )
+
+    max_prep_time = forms.IntegerField(
+        label="Maximum preparation time",
+        required=False,
+        validators=[MinValueValidator(limit_value=1),],
+    )
 
 # Review Form
 class ReviewForm(forms.ModelForm):
@@ -35,6 +84,7 @@ class ReviewForm(forms.ModelForm):
                 attrs={"placeholder": "Write your comment here..."}
             )
         }
+        required=False
 
 class PantryItemForm(forms.Form):
     """add an ingredient or change its amount. Quantity 0 removes it."""
@@ -46,3 +96,20 @@ class PantryItemForm(forms.Form):
 class BatchSizeForm(forms.Form):
     """how many servings to make."""
     servings = forms.IntegerField(min_value=1, max_value=500)
+
+class SignUpForm(UserCreationForm):
+    # Add an email field to the signup form
+    email = forms.EmailField(required=True)
+
+    class Meta:
+        model = User
+        fields = ["username", "email", "password1", "password2"]
+
+    # Make sure an email is not already registered
+    def clean_email(self):
+        email = self.cleaned_data["email"]
+
+        if User.objects.filter(email__iexact=email).exists():
+            raise forms.ValidationError("This email is already registered.")
+
+        return email

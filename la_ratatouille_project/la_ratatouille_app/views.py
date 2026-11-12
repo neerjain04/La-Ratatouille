@@ -1,21 +1,21 @@
 from functools import reduce
 
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
+from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
-from django.db.models import Q
 from django.http import HttpResponse
-from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
-
-from .forms import BatchSizeForm, PantryItemForm, ReviewForm, SearchForm
-from .models import Favorite, Ingredient, Recipe, Review
 from .pantry import Pantry
+from .models import Ingredient, Recipe, Review, Favorite
+from .forms import BatchSizeForm, PantryItemForm, SearchForm, ReviewForm, SignUpForm
+from django.db.models import F, Q, Count, Avg
+from django.core.paginator import Paginator
 
 
 # Home page
 def index(request):
-    return HttpResponse("Welcome to La Ratatouille. This page is under construction.")
-
+    return render(request, "la_ratatouille_app/home.html")
 
 # Add Comment
 @login_required
@@ -57,7 +57,7 @@ def add_comment(request, recipe_id):
     return HttpResponse("Invalid rating or comment.", status=400)
 
 
-# Display recipe: reviews, favorite, batch size and missing ingredients
+# Display recipe: reviews, favorite, batch size and missing ingredients 
 def recipe_detail(request, recipe_id):
 
     recipe = get_object_or_404(Recipe, id=recipe_id)
@@ -116,20 +116,66 @@ def remove_comment(request, review_id):
 
 # Search Recipes
 def search(request):
-    recipes = {}
+    '''Handle search requests'''
     form = SearchForm(request.GET)
-
+    context = {"form": form, "recipe_page": None}
     if len(request.GET) > 0 and form.is_valid():
-        where = Q()
-        ingredient_ids = (int(id) for id in request.GET.getlist("ingredients"))
-        where = reduce(
-            lambda x, y: x & y,
-            (Q(ingredients__id=id) for id in ingredient_ids),
-            where
-        )
-        recipes = Recipe.objects.filter(where)
+        # user entered search terms
+        name = form.cleaned_data.get("name")
+        ingredients = form.cleaned_data.get("ingredients")
+        tags = form.cleaned_data.get("tags")
+        min_rating = form.cleaned_data.get("min_rating")
+        max_ingredient_count = form.cleaned_data.get("max_ingredient_count")
+        max_prep_time = form.cleaned_data.get("max_prep_time")
+        recipes = Recipe.objects
 
-    context = {"recipes": recipes, "form": form}
+        if name is not None:
+            recipes = recipes.filter(name__istartswith=name)
+        if max_prep_time is not None:
+            recipes = recipes.filter(prep_time__lte=max_prep_time) 
+        if len(ingredients) > 0:
+            for ingredient in ingredients:
+                recipes = recipes.filter(ingredients=ingredient)
+        if len(tags) > 0:
+            for tag in tags:
+                recipes = recipes.filter(tags=tag)
+
+        recipes = Recipe.objects.filter(id__in=recipes.values_list("id"))
+
+        # annotate with avg rating and ingredient count
+        recipes = recipes.annotate(
+            rating=Avg("reviews__rating"),
+            ingredient_count=Count("ingredients", distinct=True))
+        if min_rating is not None:
+            recipes = recipes.filter(rating__gte=min_rating)
+        if max_ingredient_count is not None:
+            recipes = recipes.filter(ingredient_count__lte=max_ingredient_count)
+
+        # logged in users
+        if request.user.is_authenticated:
+            # filter by dietary restrictions
+            for restriction in request.user.dietary_restrictions.all():
+                recipes = recipes.filter(tags=restriction)
+
+            # annotate with missing ingredient count
+            recipes = recipes.annotate(
+                count_missing_ingredients=F("ingredient_count") - Count("ingredients", distinct=True,
+                                            filter=Q(ingredients__users=request.user)))
+  
+        sort_criteria = form.cleaned_data.get("order_by")
+        # sort by name if no sort order given
+        if sort_criteria == "" or sort_criteria is None:
+            sort_criteria = "name"
+        if sort_criteria in ("name", "-name"):
+            recipes = recipes.order_by(sort_criteria)
+        else:              
+            recipes = recipes.order_by(sort_criteria, "name")
+
+        items_per_page = form.cleaned_data.get("items_per_page", 10)
+        paginator = Paginator(recipes, items_per_page)
+        page = request.GET.get("page", 1)
+        recipe_page = paginator.get_page(page)
+        context["recipe_page"] = recipe_page
     return render(request, "la_ratatouille_app/search.html", context)
 
 
@@ -244,3 +290,57 @@ def pantry_delete(request):
         messages.success(request, f"Deleted your pantry ({count} ingredients).")
         return redirect("pantry")
     return render(request, "la_ratatouille_app/pantry_confirm_delete.html")
+
+
+# ---------------------------------------------------------------- Recipe page
+@login_required
+def recipe_detail(request, recipe_id):
+    """UC 51: ?servings=N rescales the ingredients. UC 53: lists what the pantry is missing."""
+    recipe = get_object_or_404(Recipe, pk=recipe_id)
+    form = BatchSizeForm(request.GET or None, initial={"servings": recipe.num_servings})
+    servings = form.cleaned_data["servings"] if form.is_valid() else recipe.num_servings
+    multiplier = recipe.multiplier_for(servings)
+    context = {
+        "recipe": recipe, "form": form, "servings": servings,
+        "lines": recipe.scale_batch(multiplier),
+        "missing": recipe.get_missing_ingredients(Pantry(request.user), multiplier),
+    }
+    return render(request, "la_ratatouille_app/recipe_detail.html", context)
+
+# User Authentication
+
+def signup(request):
+    if request.method == "POST":
+        form = SignUpForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)
+            return redirect("index")
+    else:
+        form = SignUpForm()
+
+    return render(request, "la_ratatouille_app/signup.html", {"form": form})
+
+
+def user_login(request):
+    if request.method == "POST":
+        username = request.POST.get("username")
+        password = request.POST.get("password")
+
+        user = authenticate(request, username=username, password=password)
+
+        if user is not None:
+            login(request, user)
+            return redirect("index")
+        else:
+            return render(request, "la_ratatouille_app/login.html", {
+                "error": "Invalid username or password."
+            })
+
+    return render(request, "la_ratatouille_app/login.html")
+
+
+@require_POST
+def user_logout(request):
+    logout(request)
+    return redirect("index")
