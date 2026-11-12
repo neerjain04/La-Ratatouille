@@ -14,10 +14,15 @@ from .forms import (
 )
 from django.db.models import F, Q, Count, Avg
 from django.core.paginator import Paginator
+from django.contrib.auth.models import User
+from django import forms
 
 
 # Home page
 def index(request):
+    if not request.user.is_authenticated:
+        return redirect("login")
+
     return render(request, "la_ratatouille_app/home.html")
 
 # Add Comment
@@ -222,10 +227,10 @@ def unfavorite_recipe(request, recipe_id):
     return redirect("recipe_detail", recipe_id=recipe_id)
 
 
-# ---------------------------------------------------------------- Pantry (UC 52, 54, 55)
+# ---------------------------------------------------------------- Pantry
 @login_required
 def pantry(request):
-    """Show the user's pantry and handle the add/edit form (UC 52)."""
+    """Show the user's pantry and handle the add/edit form"""
     my_pantry = Pantry(request.user)
     form = PantryItemForm(request.POST or None)
     if request.method == "POST" and form.is_valid():
@@ -242,7 +247,7 @@ def pantry(request):
 @login_required
 @require_POST
 def pantry_remove_item(request, ingredient_id):
-    """UC 52 alternate flow: remove one ingredient."""
+    """alternate flow: remove one ingredient."""
     ingredient = get_object_or_404(Ingredient, pk=ingredient_id)
     if Pantry(request.user).remove_ingredient(ingredient):
         messages.success(request, f"Removed {ingredient} from your pantry.")
@@ -251,7 +256,7 @@ def pantry_remove_item(request, ingredient_id):
 
 @login_required
 def pantry_delete(request):
-    """UC 55: GET shows a confirmation page, POST empties the pantry."""
+    """GET shows a confirmation page, POST empties the pantry."""
     if request.method == "POST":
         count = Pantry(request.user).delete()
         messages.success(request, f"Deleted your pantry ({count} ingredients).")
@@ -259,10 +264,10 @@ def pantry_delete(request):
     return render(request, "la_ratatouille_app/pantry_confirm_delete.html")
 
 
-# ---------------------------------------------------------------- Recipe page (UC 51, 53)
+# ---------------------------------------------------------------- Recipe page 
 @login_required
 def recipe_detail(request, recipe_id):
-    """UC 51: ?servings=N rescales the ingredients. UC 53: lists what the pantry is missing."""
+    """?servings=N rescales the ingredients. lists what the pantry is missing."""
     recipe = get_object_or_404(Recipe, pk=recipe_id)
     batch_form = BatchSizeForm(request.GET or None, initial={"servings": recipe.num_servings})
     servings = batch_form.cleaned_data["servings"] if batch_form.is_valid() else recipe.num_servings
@@ -289,7 +294,7 @@ def signup(request):
         if form.is_valid():
             user = form.save()
             login(request, user)
-            return redirect("index")
+            return redirect("pantry")
     else:
         form = SignUpForm()
 
@@ -401,3 +406,8 @@ def rate_recipe(request, recipe_id):
     else:
         messages.error(request, "Choose a rating from 1 to 5 stars.")
     return redirect("recipe_detail", recipe_id=recipe.pk)
+def delete_account(request):
+    user = request.user
+    logout(request)
+    user.delete()
+    return redirect("index")

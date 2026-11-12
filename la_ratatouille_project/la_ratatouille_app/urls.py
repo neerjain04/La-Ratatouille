@@ -1,4 +1,4 @@
-
+from django.views.generic import RedirectView
 from django.urls import path
 from . import views
 
@@ -6,9 +6,12 @@ urlpatterns = [
     path("", views.index, name="index"),
     # User authentication
     path("signup/", views.signup, name="signup"),
-    path("login/", views.user_login, name="login"),
+    path("login/", RedirectView.as_view(pattern_name="login", permanent=False)),
     path("logout/", views.user_logout, name="logout"),
-
+    # Profile management
+    path("profile/", views.profile, name="profile"),
+    path("profile/edit/", views.edit_profile, name="edit_profile"),
+    path("profile/delete/", views.delete_account, name="delete_account"),
     # Search feature from main
     path("search/", views.search, name="search"),
     path("recipes/new/", views.recipe_create, name="recipe_create"),
