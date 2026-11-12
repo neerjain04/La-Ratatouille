@@ -1,0 +1,10 @@
+{% extends "la_ratatouille_app/base.html" %}
+{% block body %}
+<h1>Delete recipe</h1>
+<p>Are you sure you want to delete {{ recipe.name }}?</p>
+<form method="post">
+    {% csrf_token %}
+    <button type="submit">Confirm delete</button>
+    <a href="{% url 'recipe_detail' recipe.id %}">Cancel</a>
+</form>
+{% endblock %}

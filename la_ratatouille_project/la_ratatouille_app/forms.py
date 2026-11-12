@@ -1,5 +1,6 @@
 from django import forms
-from .models import Ingredient, Tag, Review, Unit
+from django.forms import inlineformset_factory
+from .models import Ingredient, Tag, Review, Unit, Recipe, RecipeIngredient
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
@@ -113,3 +114,40 @@ class SignUpForm(UserCreationForm):
             raise forms.ValidationError("This email is already registered.")
 
         return email
+class RecipeForm(forms.ModelForm):
+    """Validate the details a user supplies when adding or editing a recipe."""
+    calories_per_serving = forms.IntegerField(min_value=0)
+    num_servings = forms.IntegerField(min_value=1, label="Servings")
+    prep_time = forms.IntegerField(min_value=0, label="Preparation time (minutes)")
+    tags = forms.ModelMultipleChoiceField(queryset=Tag.objects.all(), required=False)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.instance.pk:
+            self.fields["tags"].initial = self.instance.tags.all()
+
+    class Meta:
+        model = Recipe
+        fields = ["name", "instructions", "calories_per_serving", "num_servings", "prep_time"]
+
+
+class RecipeIngredientForm(forms.ModelForm):
+    quantity = forms.IntegerField(min_value=1)
+
+    class Meta:
+        model = RecipeIngredient
+        fields = ["ingredient", "quantity", "unit"]
+
+
+RecipeIngredientFormSet = inlineformset_factory(
+    Recipe, RecipeIngredient, form=RecipeIngredientForm,
+    extra=3, min_num=1, validate_min=True, can_delete=True,
+)
+
+
+class RatingForm(forms.Form):
+    rating = forms.TypedChoiceField(
+        choices=[(value, f"{value} star{'s' if value != 1 else ''}") for value in range(1, 6)],
+        coerce=int,
+        label="Your rating",
+    )
