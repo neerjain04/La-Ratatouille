@@ -4,6 +4,18 @@
 {% block body %}
 
 <h1>{{ recipe.name }}</h1>
+{% if user == recipe.user %}
+    <p><a href="{% url 'recipe_edit' recipe.id %}">Edit recipe</a>
+       <a href="{% url 'recipe_delete' recipe.id %}">Delete recipe</a></p>
+{% endif %}
+<p>Average rating: {% if average_rating != None %}{{ average_rating|floatformat:1 }} / 5{% else %}Not rated yet{% endif %}</p>
+{% if user.is_authenticated %}
+    <form method="post" action="{% url 'rate_recipe' recipe.id %}">
+        {% csrf_token %}
+        {{ rating_form.as_p }}
+        <button type="submit">Save rating</button>
+    </form>
+{% endif %}
 
 <!-- Favorite and Unfavorite Recipe -->
 {% if user.is_authenticated %}
@@ -33,8 +45,38 @@
 
 {% endif %}
 
+<p>Makes {{ recipe.num_servings }} serving{{ recipe.num_servings|pluralize }}. Prep time {{ recipe.prep_time }} min.</p>
+
+<!-- Adjust Batch Size (UC 51) -->
+<form method="GET">
+    {{ batch_form.as_p }}
+    <button type="submit">Adjust batch size</button>
+</form>
+
+<h2>Ingredients for {{ servings }} serving{{ servings|pluralize }}</h2>
+<ul>
+    {% for ingredient, unit, amount in lines %}
+        <li>{{ amount|floatformat:"-2" }} {{ unit|default:"" }} {{ ingredient }}</li>
+    {% endfor %}
+</ul>
+
+<!-- Determine Missing Ingredients (UC 53) -->
+{% if user.is_authenticated %}
+    <h2>What you're missing</h2>
+    {% if not missing %}
+        <p>You have everything you need.</p>
+    {% else %}
+        <ul>
+            {% for ingredient, unit, needed, have in missing %}
+                <li>{{ ingredient }}: need {{ needed|floatformat:"-2" }} {{ unit|default:"" }}, you have {{ have|floatformat:"-2" }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+    <p><a href="{% url 'pantry' %}">My pantry</a></p>
+{% endif %}
+
 <h2>Instructions</h2>
-<p>{{ recipe.instructions }}</p>
+<p>{{ recipe.instructions|linebreaksbr }}</p>
 
 <h2>Reviews</h2>
 
@@ -77,7 +119,7 @@
           action="{% url 'add_comment' recipe.id %}">
         {% csrf_token %}
 
-        {{ form.as_p }}
+        {{ review_form.as_p }}
 
         <button type="submit">
             Submit Review
@@ -87,32 +129,5 @@
 {% else %}
     <p>Please log in to leave a review.</p>
 {% endif %}
-<h1>{{ recipe.name }}</h1>
-<p>Makes {{ recipe.num_servings }} serving{{ recipe.num_servings|pluralize }}. Prep time {{ recipe.prep_time }} min.</p>
 
-{# djust Batch Size #}
-<form method="get">{{ form.as_p }}<button>Adjust batch size</button></form>
-
-<h2>Ingredients for {{ servings }} serving{{ servings|pluralize }}</h2>
-<ul>
-  {% for ingredient, unit, amount in lines %}
-    <li>{{ amount|floatformat:"-2" }} {{ unit|default:"" }} {{ ingredient }}</li>
-  {% endfor %}
-</ul>
-
-{# Determine Missing Ingredients #}
-<h2>What you're missing</h2>
-{% if not missing %}
-  <p>You have everything you need.</p>
-{% else %}
-  <ul>
-    {% for ingredient, unit, needed, have in missing %}
-      <li>{{ ingredient }}: need {{ needed|floatformat:"-2" }} {{ unit|default:"" }}, you have {{ have|floatformat:"-2" }}</li>
-    {% endfor %}
-  </ul>
-{% endif %}
-<p><a href="{% url 'pantry' %}">My pantry</a></p>
-<h2>Instructions</h2>
-<p>{{ recipe.instructions|linebreaksbr }}</p>
 {% endblock %}
-

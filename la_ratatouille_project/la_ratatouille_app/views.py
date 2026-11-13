@@ -1,20 +1,26 @@
+from functools import reduce
 
 from django.shortcuts import render, redirect, get_object_or_404
-from django.http import HttpResponse
-from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
+from django.http import HttpResponse
 from django.views.decorators.http import require_POST
+from django.db import transaction
 from .pantry import Pantry
 from .models import Ingredient, Recipe, Review, Favorite
-from .forms import BatchSizeForm, PantryItemForm, SearchForm, ReviewForm
+from .forms import (
+    BatchSizeForm, PantryItemForm, SearchForm, ReviewForm,
+    RatingForm, RecipeForm, RecipeIngredientFormSet,
+    SignUpForm
+)
 from django.db.models import F, Q, Count, Avg
 from django.core.paginator import Paginator
 
 
 # Home page
 def index(request):
-    return HttpResponse("Welcome to La Ratatouille. This page is under construction.")
-
+    return render(request, "la_ratatouille_app/home.html")
 
 # Add Comment
 @login_required
@@ -54,30 +60,6 @@ def add_comment(request, recipe_id):
         return redirect("recipe_detail", recipe_id=recipe_id)
 
     return HttpResponse("Invalid rating or comment.", status=400)
-
-
-# Display recipe and reviews
-def recipe_detail(request, recipe_id):
-
-    recipe = get_object_or_404(Recipe, id=recipe_id)
-    reviews = Review.objects.filter(recipe=recipe)
-    form = ReviewForm()
-
-    # Check if the user has favorited this recipe
-    is_favorite = False
-
-    if request.user.is_authenticated:
-        is_favorite = Favorite.objects.filter(
-            user=request.user,
-            recipe=recipe
-        ).exists()
-
-    return render(request, "la_ratatouille_app/recipe_detail.html", {
-        "recipe": recipe,
-        "reviews": reviews,
-        "form": form,
-        "is_favorite": is_favorite
-    })
 
 
 # Remove Comment
@@ -249,10 +231,10 @@ def unfavorite_recipe(request, recipe_id):
     return redirect("recipe_detail", recipe_id=recipe_id)
 
 
-# ---------------------------------------------------------------- Pantry (UC 52, 54, 55)
+# ---------------------------------------------------------------- Pantry
 @login_required
 def pantry(request):
-    """Show the user's pantry and handle the add/edit form (UC 52)."""
+    """Show the user's pantry and handle the add/edit form."""
     my_pantry = Pantry(request.user)
     form = PantryItemForm(request.POST or None)
     if request.method == "POST" and form.is_valid():
@@ -269,7 +251,7 @@ def pantry(request):
 @login_required
 @require_POST
 def pantry_remove_item(request, ingredient_id):
-    """UC 52 alternate flow: remove one ingredient."""
+    """alternate flow: remove one ingredient."""
     ingredient = get_object_or_404(Ingredient, pk=ingredient_id)
     if Pantry(request.user).remove_ingredient(ingredient):
         messages.success(request, f"Removed {ingredient} from your pantry.")
@@ -278,7 +260,7 @@ def pantry_remove_item(request, ingredient_id):
 
 @login_required
 def pantry_delete(request):
-    """UC 55: GET shows a confirmation page, POST empties the pantry."""
+    """GET shows a confirmation page, POST empties the pantry."""
     if request.method == "POST":
         count = Pantry(request.user).delete()
         messages.success(request, f"Deleted your pantry ({count} ingredients).")
@@ -286,17 +268,150 @@ def pantry_delete(request):
     return render(request, "la_ratatouille_app/pantry_confirm_delete.html")
 
 
-# ---------------------------------------------------------------- Recipe page (UC 51, 53)
+# ---------------------------------------------------------------- Recipe page 
 @login_required
 def recipe_detail(request, recipe_id):
-    """UC 51: ?servings=N rescales the ingredients. UC 53: lists what the pantry is missing."""
+    """?servings=N rescales the ingredients. lists what the pantry is missing."""
     recipe = get_object_or_404(Recipe, pk=recipe_id)
-    form = BatchSizeForm(request.GET or None, initial={"servings": recipe.num_servings})
-    servings = form.cleaned_data["servings"] if form.is_valid() else recipe.num_servings
+    batch_form = BatchSizeForm(request.GET or None, initial={"servings": recipe.num_servings})
+    servings = batch_form.cleaned_data["servings"] if batch_form.is_valid() else recipe.num_servings
     multiplier = recipe.multiplier_for(servings)
+    user_review = Review.objects.filter(user=request.user, recipe=recipe).first()
     context = {
-        "recipe": recipe, "form": form, "servings": servings,
+        "recipe": recipe, "batch_form": batch_form, "servings": servings,
         "lines": recipe.scale_batch(multiplier),
         "missing": recipe.get_missing_ingredients(Pantry(request.user), multiplier),
+        "reviews": recipe.reviews.select_related("user"),
+        "review_form": ReviewForm(),
+        "rating_form": RatingForm(initial={"rating": user_review.rating} if user_review else None),
+        "user_review": user_review,
+        "average_rating": recipe.reviews.aggregate(average=Avg("rating"))["average"],
+        "is_favorite": Favorite.objects.filter(user=request.user, recipe=recipe).exists(),
     }
     return render(request, "la_ratatouille_app/recipe_detail.html", context)
+
+# User Authentication
+
+def signup(request):
+    if request.method == "POST":
+        form = SignUpForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)
+            return redirect("index")
+    else:
+        form = SignUpForm()
+
+    return render(request, "la_ratatouille_app/signup.html", {"form": form})
+
+
+def user_login(request):
+    if request.method == "POST":
+        username = request.POST.get("username")
+        password = request.POST.get("password")
+
+        user = authenticate(request, username=username, password=password)
+
+        if user is not None:
+            login(request, user)
+            return redirect("index")
+        else:
+            return render(request, "la_ratatouille_app/login.html", {
+                "error": "Invalid username or password."
+            })
+
+    return render(request, "la_ratatouille_app/login.html")
+
+
+@require_POST
+def user_logout(request):
+    logout(request)
+    return redirect("index")
+@login_required
+def my_recipes(request):
+    recipes = Recipe.objects.filter(user=request.user).order_by("name", "id")
+    return render(request, "la_ratatouille_app/recipe_list.html", {
+        "recipes": recipes, "title": "My recipes",
+    })
+
+
+@login_required
+def favorite_recipes(request):
+    recipes = Recipe.objects.filter(favorites__user=request.user).order_by("name", "id")
+    return render(request, "la_ratatouille_app/recipe_list.html", {
+        "recipes": recipes, "title": "Favorite recipes",
+    })
+
+
+@login_required
+def recipe_create(request):
+    form = RecipeForm(request.POST or None)
+    ingredient_formset = RecipeIngredientFormSet(request.POST or None)
+    form_valid = form.is_valid() if request.method == "POST" else False
+    ingredients_valid = ingredient_formset.is_valid() if request.method == "POST" else False
+    if form_valid and ingredients_valid:
+        # Save the recipe and ingredient rows together, or not at all.
+        with transaction.atomic():
+            recipe = form.save(commit=False)
+            recipe.user = request.user
+            recipe.save()
+            recipe.tags.set(form.cleaned_data["tags"])
+            ingredient_formset.instance = recipe
+            ingredient_formset.save()
+        messages.success(request, "Recipe added.")
+        return redirect("recipe_detail", recipe_id=recipe.pk)
+    return render(request, "la_ratatouille_app/recipe_form.html", {
+        "form": form, "ingredient_formset": ingredient_formset, "title": "Add recipe",
+    })
+
+
+@login_required
+def recipe_edit(request, recipe_id):
+    # A user can only change a recipe that they created.
+    recipe = get_object_or_404(Recipe, pk=recipe_id, user=request.user)
+    form = RecipeForm(request.POST or None, instance=recipe)
+    ingredient_formset = RecipeIngredientFormSet(request.POST or None, instance=recipe)
+    form_valid = form.is_valid() if request.method == "POST" else False
+    ingredients_valid = ingredient_formset.is_valid() if request.method == "POST" else False
+    if form_valid and ingredients_valid:
+        with transaction.atomic():
+            recipe = form.save()
+            recipe.tags.set(form.cleaned_data["tags"])
+            ingredient_formset.save()
+        messages.success(request, "Recipe updated.")
+        return redirect("recipe_detail", recipe_id=recipe.pk)
+    return render(request, "la_ratatouille_app/recipe_form.html", {
+        "form": form, "ingredient_formset": ingredient_formset, "title": "Edit recipe",
+    })
+
+
+@login_required
+def recipe_delete(request, recipe_id):
+    recipe = get_object_or_404(Recipe, pk=recipe_id, user=request.user)
+    if request.method == "POST":
+        recipe.delete()
+        messages.success(request, "Recipe deleted.")
+        return redirect("my_recipes")
+    return render(request, "la_ratatouille_app/recipe_confirm_delete.html", {"recipe": recipe})
+
+
+@login_required
+@require_POST
+def rate_recipe(request, recipe_id):
+    recipe = get_object_or_404(Recipe, pk=recipe_id)
+    form = RatingForm(request.POST)
+    if form.is_valid():
+        # Ratings share a Review with comments; updating the rating must keep the comment.
+        Review.objects.update_or_create(
+            user=request.user, recipe=recipe,
+            defaults={"rating": form.cleaned_data["rating"]},
+        )
+        messages.success(request, "Your rating was saved.")
+    else:
+        messages.error(request, "Choose a rating from 1 to 5 stars.")
+    return redirect("recipe_detail", recipe_id=recipe.pk)
+def delete_account(request):
+    user = request.user
+    logout(request)
+    user.delete()
+    return redirect("index")
