@@ -1,0 +1,30 @@
+{% extends "la_ratatouille_app/base.html" %}
+{% block body %}
+<h1>Make a recipe with AI</h1>
+{% for message in messages %}<p><strong>{{ message }}</strong></p>{% endfor %}
+<p>The recipe AI learned which ingredients go together, and how they are cooked, from the recipes in our dataset.
+It starts from what is in your pantry, or from the main ingredient you pick.</p>
+
+{# Generate Recipe Using AI #}
+<form method="post">{% csrf_token %}{{ form.as_p }}<button>Generate</button></form>
+
+{% if draft %}
+  <h2>{{ draft.name }}</h2>
+  <p>Makes {{ draft.num_servings }} serving{{ draft.num_servings|pluralize }}. About {{ draft.prep_time }} min.
+     About {{ draft.calories_per_serving }} calories per serving (rough estimate).</p>
+  {% if draft.from_pantry %}<p>From your pantry: {{ draft.from_pantry|join:", " }}</p>{% endif %}
+  {% if draft.not_learned %}<p>The AI hasn't learned {{ draft.not_learned|join:", " }} yet, so it was left out.</p>{% endif %}
+
+  <h3>Ingredients</h3>
+  <ul>
+    {% for line in draft.ingredients %}<li>{{ line.quantity }} {{ line.unit }} {{ line.name }}</li>{% endfor %}
+  </ul>
+
+  <h3>Instructions</h3>
+  <p>{{ draft.instructions|linebreaksbr }}</p>
+
+  {# Save Recipe Created by AI #}
+  <form method="post" action="{% url 'ai_save_recipe' %}">{% csrf_token %}<button>Save this recipe</button></form>
+  <p>Not quite right? Press Generate again for a different recipe.</p>
+{% endif %}
+{% endblock %}

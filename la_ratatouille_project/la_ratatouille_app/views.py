@@ -8,9 +8,10 @@ from django.http import HttpResponse
 from django.views.decorators.http import require_POST
 from django.db import transaction
 from .pantry import Pantry
+from .recipe_ai import DRAFT_SESSION_KEY, RecipeAI, save_draft
 from .models import Ingredient, Recipe, Review, Favorite
 from .forms import (
-    BatchSizeForm, PantryItemForm, SearchForm, ReviewForm,
+    AIRecipeForm, BatchSizeForm, PantryItemForm, SearchForm, ReviewForm,
     RatingForm, RecipeForm, RecipeIngredientFormSet,
     SignUpForm
 )
@@ -224,10 +225,39 @@ def unfavorite_recipe(request, recipe_id):
     return redirect("recipe_detail", recipe_id=recipe_id)
 
 
+# ---------------------------------------------------------------- Recipe AI
+# Edit Recipe Created by AI uses Neer's recipe_edit (the owner sees "Edit recipe" on the recipe page).
+@login_required
+def ai_generate_recipe(request):
+    """Make a recipe from the user's pantry with the recipe AI trained on our dataset."""
+    form = AIRecipeForm(request.POST or None)
+    draft = None
+    if request.method == "POST" and form.is_valid():
+        options = form.cleaned_data
+        pantry_names = [item.ingredient.name for item in Pantry(request.user).items()] if options["use_pantry"] else []
+        main = [options["main_ingredient"].name] if options["main_ingredient"] else []
+        draft = RecipeAI.from_file().generate(pantry_names, must_include=main,
+                                              servings=options["servings"], size=options["size"])
+        request.session[DRAFT_SESSION_KEY] = draft      # kept until the user saves it
+    return render(request, "la_ratatouille_app/ai_recipe.html", {"form": form, "draft": draft})
+
+
+@login_required
+@require_POST
+def ai_save_recipe(request):
+    """Save the recipe the AI just made as one of the user's recipes."""
+    draft = request.session.pop(DRAFT_SESSION_KEY, None)
+    if draft is None:
+        messages.error(request, "Generate a recipe first.")
+        return redirect("ai_generate_recipe")
+    recipe = save_draft(draft, request.user)
+    messages.success(request, f"Saved {recipe.name} to your recipes.")
+    return redirect("recipe_detail", recipe_id=recipe.id)
+
 # ---------------------------------------------------------------- Pantry
 @login_required
 def pantry(request):
-    """Show the user's pantry and handle the add/edit form."""
+    """Show the user's pantry by food group and handle the add/edit form."""
     my_pantry = Pantry(request.user)
     form = PantryItemForm(request.POST or None)
     if request.method == "POST" and form.is_valid():
@@ -238,7 +268,11 @@ def pantry(request):
         else:
             messages.success(request, f"Pantry now has {item.quantity} {item.unit or ''} {item.ingredient}.")
         return redirect("pantry")
-    return render(request, "la_ratatouille_app/pantry.html", {"items": my_pantry.items(), "form": form})
+    # Same order as the food groups in the menu, then A-Z, so the template can list them under group headings.
+    group_order = {code: i for i, code in enumerate(Ingredient.FoodGroup.values)}
+    items = sorted(my_pantry.items(), key=lambda item: (group_order.get(item.ingredient.food_group, len(group_order)),
+                                                        item.ingredient.name.lower()))
+    return render(request, "la_ratatouille_app/pantry.html", {"items": items, "form": form})
 
 
 @login_required

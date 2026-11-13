@@ -52,9 +52,26 @@ class Unit(models.Model):
 
 
 class Ingredient(models.Model):
+    # Groups the pantry menu is split into. Listed in the order the page shows them.
+    class FoodGroup(models.TextChoices):
+        PROTEIN = "protein", "Proteins (meat, seafood, eggs, tofu)"
+        LEGUME = "legume", "Beans, lentils & dals"
+        DAIRY = "dairy", "Dairy & alternatives"
+        VEGETABLE = "vegetable", "Vegetables"
+        FRUIT = "fruit", "Fruits"
+        GRAIN = "grain", "Grains, flours & bread"
+        NUT_SEED = "nut_seed", "Nuts & seeds"
+        HERB_SPICE = "herb_spice", "Herbs & spices"
+        OIL_FAT = "oil_fat", "Oils & fats"
+        CONDIMENT = "condiment", "Sauces & condiments"
+        BAKING = "baking", "Sugars & baking"
+        BEVERAGE = "beverage", "Beverages"
+        OTHER = "other", "Other"
+
     name = models.CharField(max_length=50, unique=True)
     vegan = models.BooleanField(default=False)
     gluten_free = models.BooleanField(default=False)
+    food_group = models.CharField(max_length=20, choices=FoodGroup.choices, default=FoodGroup.OTHER)
     users = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name="pantry", through="UserIngredient")
 
     def __str__(self):
@@ -76,6 +93,8 @@ class Recipe(models.Model):
         related_name="recipes",
     )
     photo = models.ImageField(upload_to="recipe_photos/", blank=True, null=True)
+    # True for recipes saved from the recipe AI
+    ai_generated = models.BooleanField(default=False)
 
     def __str__(self):
         return self.name

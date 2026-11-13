@@ -4,6 +4,7 @@
 {% block body %}
 
 <h1>{{ recipe.name }}</h1>
+{% if recipe.ai_generated %}<p><em>Made with the La Ratatouille recipe AI.</em></p>{% endif %}
 {% if user == recipe.user %}
     <p><a href="{% url 'recipe_edit' recipe.id %}">Edit recipe</a>
        <a href="{% url 'recipe_delete' recipe.id %}">Delete recipe</a></p>
