@@ -95,7 +95,7 @@ class SearchTests(TestCase):
 
 
 """
-Tests for the pantry use cases (UC 51-55). Run with:
+Tests for the pantry use cases. Run with:
     python manage.py test la_ratatouille_app
 """
 
@@ -119,7 +119,7 @@ class PantryTestBase(TestCase):
         RecipeIngredient.objects.create(recipe=self.recipe, ingredient=self.egg, unit=self.each, quantity=2)
 
 
-class CreatePantryTests(PantryTestBase):           # UC 54
+class CreatePantryTests(PantryTestBase):        
     def test_new_user_has_empty_pantry(self):
         self.assertEqual(Pantry(self.user).items().count(), 0)
 
@@ -129,7 +129,7 @@ class CreatePantryTests(PantryTestBase):           # UC 54
         self.assertEqual(set(pantry.ingredients()), {self.flour, self.egg})   # existing user.pantry manager
 
 
-class DeletePantryTests(PantryTestBase):           # UC 55
+class DeletePantryTests(PantryTestBase):          
     def test_delete_removes_every_item(self):
         pantry = Pantry.create(self.user, [(self.flour, self.cup, 3), (self.milk, self.cup, 1)])
         self.assertEqual(pantry.delete(), 2)
@@ -144,7 +144,7 @@ class DeletePantryTests(PantryTestBase):           # UC 55
         self.assertEqual(UserIngredient.objects.count(), 0)
 
 
-class EditPantryTests(PantryTestBase):             # UC 52
+class EditPantryTests(PantryTestBase):           
     def test_add_then_update(self):
         pantry = Pantry(self.user)
         pantry.add_ingredient(self.flour, 1, self.cup)
@@ -174,7 +174,7 @@ class EditPantryTests(PantryTestBase):             # UC 52
         self.assertContains(self.client.get(reverse("pantry")), "Milk")
 
 
-class AdjustBatchSizeTests(PantryTestBase):        # UC 51
+class AdjustBatchSizeTests(PantryTestBase):       
     def test_double(self):
         amounts = [amount for _, _, amount in self.recipe.scale_batch(2)]
         self.assertEqual(amounts, [Decimal("4.00"), Decimal("6.00"), Decimal("4.00")])
@@ -194,7 +194,7 @@ class AdjustBatchSizeTests(PantryTestBase):        # UC 51
         self.assertContains(resp, "4 c Flour")
 
 
-class MissingIngredientsTests(PantryTestBase):     # UC 53
+class MissingIngredientsTests(PantryTestBase):    
     def test_empty_pantry(self):
         pantry = Pantry(self.user)
         self.assertEqual(len(self.recipe.get_missing_ingredients(pantry)), 3)
@@ -214,6 +214,31 @@ class MissingIngredientsTests(PantryTestBase):     # UC 53
         self.assertEqual(names, ["Flour", "Egg"])
 
 
+class RecipeDetailPageTests(PantryTestBase):       # one page for reviews, favorites
+    def test_one_url_for_recipe_detail(self):
+        self.assertEqual(reverse("recipe_detail", args=[self.recipe.id]), f"/recipe/{self.recipe.id}/")
+
+    def test_reviews_and_batch_size_on_same_page(self):
+        from .models import Review
+        Review.objects.create(user=self.user, recipe=self.recipe, rating=5, comment="Fluffy!")
+        self.client.force_login(self.user)
+        resp = self.client.get(reverse("recipe_detail", args=[self.recipe.id]), {"servings": 8})
+        self.assertContains(resp, "Fluffy!")                   # Jenna's reviews
+        self.assertContains(resp, "Favorite Recipe")           # Jenna's favorite button
+        self.assertContains(resp, "Ingredients for 8 servings")  
+        self.assertContains(resp, "What you're missing")       
+        self.assertContains(resp, "Submit Review")
+
+    def test_logged_out_visitor_can_view(self):
+        resp = self.client.get(reverse("recipe_detail", args=[self.recipe.id]))
+        self.assertEqual(resp.status_code, 200)
+        self.assertContains(resp, "Please log in to leave a review.")
+        self.assertNotContains(resp, "What you're missing")
+
+    def test_add_comment_redirects_back_to_recipe(self):
+        self.client.force_login(self.user)
+        resp = self.client.post(reverse("add_comment", args=[self.recipe.id]), {"rating": 4, "comment": "Good"})
+        self.assertRedirects(resp, f"/recipe/{self.recipe.id}/")
 class RecipeManagementTests(TestCase):
     """Exercise the five assigned recipe use cases and their existing integrations."""
 

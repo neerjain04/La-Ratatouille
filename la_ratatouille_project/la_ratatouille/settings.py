@@ -128,6 +128,6 @@ MAILERS = {
 }
 
 # Where @login_required sends people, and where they land after logging in/out.
-LOGIN_URL = "/accounts/login/"
+LOGIN_URL = "login"
 LOGIN_REDIRECT_URL = "pantry"
 LOGOUT_REDIRECT_URL = "login"

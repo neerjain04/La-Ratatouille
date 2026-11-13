@@ -88,14 +88,14 @@ class ReviewForm(forms.ModelForm):
         required=False
 
 class PantryItemForm(forms.Form):
-    """UC 52: add an ingredient or change its amount. Quantity 0 removes it."""
+    """add an ingredient or change its amount. Quantity 0 removes it."""
     ingredient = forms.ModelChoiceField(queryset=Ingredient.objects.all())
     quantity = forms.IntegerField(min_value=0)
     unit = forms.ModelChoiceField(queryset=Unit.objects.all(), required=False)
 
 
 class BatchSizeForm(forms.Form):
-    """UC 51: how many servings to make."""
+    """how many servings to make."""
     servings = forms.IntegerField(min_value=1, max_value=500)
 
 class SignUpForm(UserCreationForm):

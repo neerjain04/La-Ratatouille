@@ -1,28 +1,25 @@
-from django.contrib.auth import authenticate, login, logout
-from .forms import SignUpForm
+from functools import reduce
+
 from django.shortcuts import render, redirect, get_object_or_404
-from django.http import HttpResponse
-from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from django.db import transaction
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
+from django.http import HttpResponse
 from django.views.decorators.http import require_POST
+from django.db import transaction
 from .pantry import Pantry
 from .models import Ingredient, Recipe, Review, Favorite
 from .forms import (
     BatchSizeForm, PantryItemForm, SearchForm, ReviewForm,
     RatingForm, RecipeForm, RecipeIngredientFormSet,
+    SignUpForm
 )
 from django.db.models import F, Q, Count, Avg
 from django.core.paginator import Paginator
-from django.contrib.auth.models import User
-from django import forms
 
 
 # Home page
 def index(request):
-    if not request.user.is_authenticated:
-        return redirect("login")
-
     return render(request, "la_ratatouille_app/home.html")
 
 # Add Comment
@@ -230,7 +227,7 @@ def unfavorite_recipe(request, recipe_id):
 # ---------------------------------------------------------------- Pantry
 @login_required
 def pantry(request):
-    """Show the user's pantry and handle the add/edit form"""
+    """Show the user's pantry and handle the add/edit form."""
     my_pantry = Pantry(request.user)
     form = PantryItemForm(request.POST or None)
     if request.method == "POST" and form.is_valid():
@@ -294,7 +291,7 @@ def signup(request):
         if form.is_valid():
             user = form.save()
             login(request, user)
-            return redirect("pantry")
+            return redirect("index")
     else:
         form = SignUpForm()
 
