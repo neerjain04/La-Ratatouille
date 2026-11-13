@@ -48,7 +48,7 @@
 
 <p>Makes {{ recipe.num_servings }} serving{{ recipe.num_servings|pluralize }}. Prep time {{ recipe.prep_time }} min.</p>
 
-<!-- Adjust Batch Size (UC 51) -->
+<!-- Adjust Batch Size (3.1.14) -->
 <form method="GET">
     {{ batch_form.as_p }}
     <button type="submit">Adjust batch size</button>
@@ -61,7 +61,7 @@
     {% endfor %}
 </ul>
 
-<!-- Determine Missing Ingredients (UC 53) -->
+<!-- Determine Missing Ingredients (3.1.25) -->
 {% if user.is_authenticated %}
     <h2>What you're missing</h2>
     {% if not missing %}

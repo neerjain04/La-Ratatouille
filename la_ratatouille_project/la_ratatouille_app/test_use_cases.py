@@ -1,21 +1,3 @@
-"""
-Tests for Aiden's use cases (SRS section 3.1).
-
-    Adjust Batch Size ......................... AdjustBatchSizeTests
-    Edit Ingredient in Pantry ................. EditPantryTests, PantryFoodGroupTests
-    Determine Missing Ingredients ............. MissingIngredientsTests
-    Create Pantry ............................. CreatePantryTests
-    Delete Pantry ............................. DeletePantryTests
-    Generate Recipe Using AI .................. RecipeAITests, AIRecipePageTests
-    Save Recipe Created by AI ................. AIRecipePageTests
-    Training the AI on the dataset ............ TrainRecipeAICommandTests
-    Dataset ingredients and food groups ....... FoodGroupRuleTests, LoadIngredientsCommandTests
-    The shared recipe page .................... RecipeDetailPageTests
-
-Run all of these:      python manage.py test la_ratatouille_app.test_use_cases
-Run one use case:      python manage.py test la_ratatouille_app.test_use_cases.DeletePantryTests
-Run the whole app:     python manage.py test la_ratatouille_app
-"""
 import csv
 import tempfile
 from decimal import Decimal
@@ -547,6 +529,10 @@ class RecipeDetailPageTests(PantryTestBase):
         resp = self.client.get(self.recipe_url)
         self.assertEqual(resp.status_code, 302)
         self.assertIn("login", resp.url)
+    def test_logged_out_visitor_can_view(self):
+        resp = self.client.get(self.recipe_url)
+        self.assertEqual(resp.status_code, 200)
+        self.assertContains(resp, "Please log in to leave a review.")
 
     def test_add_comment_redirects_back_to_recipe(self):
         self.client.force_login(self.user)
