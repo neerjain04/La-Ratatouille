@@ -109,6 +109,7 @@ def search(request):
             for tag in tags:
                 recipes = recipes.filter(tags=tag)
 
+        # filtering by ingredient removes rows needed for annotations
         recipes = Recipe.objects.filter(id__in=recipes.values_list("id"))
 
         # annotate with avg rating and ingredient count
@@ -140,9 +141,15 @@ def search(request):
         else:              
             recipes = recipes.order_by(sort_criteria, "name")
 
-        items_per_page = form.cleaned_data.get("items_per_page", 10)
+        try:
+            items_per_page = int(form.cleaned_data["items_per_page"])
+        except (ValueError, KeyError):
+            items_per_page = 10
         paginator = Paginator(recipes, items_per_page)
-        page = request.GET.get("page", 1)
+        try:
+            page = int(request.GET["page"])
+        except (ValueError, KeyError):
+            page = 1
         recipe_page = paginator.get_page(page)
         context["recipe_page"] = recipe_page
     return render(request, "la_ratatouille_app/search.html", context)
